@@ -21,14 +21,18 @@ class ChatbotHandler(BaseHandler):
         self.manifest = ctx.manifest
         _logger.info("Loading the fine-tuned GPT-JT 6B model.")
 
-        self.tokenizer = AutoTokenizer.from_pretrained("togethercomputer/GPT-JT-6B-v1", padding_side="left")
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            "togethercomputer/GPT-JT-6B-v1", padding_side="left"
+        )
         model = AutoModelForCausalLM.from_pretrained("togethercomputer/GPT-JT-6B-v1")
-        ds_engine = deepspeed.init_inference(model,
-                                             mp_size=1,
-                                             dtype=torch.int8,
-                                             checkpoint=None,
-                                             replace_method='auto',
-                                             replace_with_kernel_inject=True)
+        ds_engine = deepspeed.init_inference(
+            model,
+            mp_size=1,
+            dtype=torch.half,
+            checkpoint=None,
+            replace_method="auto",
+            replace_with_kernel_inject=True,
+        )
 
         self.model = ds_engine.module
         self.model.eval()
@@ -41,7 +45,11 @@ class ChatbotHandler(BaseHandler):
         num_beams = data[0].get("body").get("num_beams")
         num_tokens = data[0].get("body").get("num_tokens")
         input_ids = self.tokenizer.encode(text, return_tensors="pt").cuda()
-        return {"input_ids": input_ids, "num_beams": num_beams, "num_tokens": num_tokens}
+        return {
+            "input_ids": input_ids,
+            "num_beams": num_beams,
+            "num_tokens": num_tokens,
+        }
 
     def inference(self, data):
         with torch.no_grad():
