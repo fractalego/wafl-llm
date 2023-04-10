@@ -19,12 +19,13 @@ class ChatbotHandler(BaseHandler):
 
     def initialize(self, ctx):
         self.manifest = ctx.manifest
-        _logger.info("Loading the fine-tuned GPT-JT 6B model.")
+        model_name = "togethercomputer/GPT-JT-6B-v1"
+        _logger.info(f"Loading the model {model_name}.")
 
         self.tokenizer = AutoTokenizer.from_pretrained(
-            "togethercomputer/GPT-JT-6B-v1", padding_side="left"
+            model_name, padding_side="left"
         )
-        model = AutoModelForCausalLM.from_pretrained("togethercomputer/GPT-JT-6B-v1")
+        model = AutoModelForCausalLM.from_pretrained(model_name)
         ds_engine = deepspeed.init_inference(
             model,
             mp_size=1,
