@@ -25,6 +25,7 @@ class ChatbotHandler(BaseHandler):
         self.tokenizer = AutoTokenizer.from_pretrained(
             model_name, padding_side="left"
         )
+        self.tokenizer.truncation_side = 'left'
         model = AutoModelForCausalLM.from_pretrained(model_name)
         ds_engine = deepspeed.init_inference(
             model,
@@ -33,6 +34,7 @@ class ChatbotHandler(BaseHandler):
             checkpoint=None,
             replace_method="auto",
             replace_with_kernel_inject=True,
+            max_out_tokens=2048,
         )
 
         self.model = ds_engine.module
@@ -45,7 +47,7 @@ class ChatbotHandler(BaseHandler):
         text = data[0].get("body").get("data")
         num_beams = data[0].get("body").get("num_beams")
         num_tokens = data[0].get("body").get("num_tokens")
-        input_ids = self.tokenizer.encode(text, return_tensors="pt").cuda()
+        input_ids = self.tokenizer.encode(text, return_tensors="pt", truncation=True, max_length=2032).cuda()
         return {
             "input_ids": input_ids,
             "num_beams": num_beams,
