@@ -34,7 +34,7 @@ class ChatbotHandler(BaseHandler):
             checkpoint=None,
             replace_method="auto",
             replace_with_kernel_inject=True,
-            max_out_tokens=2048,
+            max_out_tokens=1024,
         )
 
         self.model = ds_engine.module
@@ -42,12 +42,11 @@ class ChatbotHandler(BaseHandler):
 
         _logger.info("Transformer model loaded successfully.")
         self.initialized = True
-
     def preprocess(self, data):
         text = data[0].get("body").get("data")
         num_beams = data[0].get("body").get("num_beams")
         num_tokens = data[0].get("body").get("num_tokens")
-        input_ids = self.tokenizer.encode(text, return_tensors="pt", truncation=True, max_length=2032).cuda()
+        input_ids = self.tokenizer.encode(text, return_tensors="pt", truncation=True, max_length=1008).cuda()
         return {
             "input_ids": input_ids,
             "num_beams": num_beams,
