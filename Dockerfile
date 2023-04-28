@@ -22,8 +22,12 @@ RUN pip install --upgrade requests
 COPY ./src/ /app/src/
 
 RUN torch-model-archiver --model-name "wafl-llm" --version 0.0.1 \
-                         --handler /app/src/handler.py --export-path /app/models/
+                         --handler /app/src/llm_handler.py --export-path /app/models/
+
+RUN torch-model-archiver --model-name "entailment" --version 0.0.1 \
+                         --handler /app/src/entailment_handler.py --export-path /app/models/
+
 
 COPY config.properties /app/
-
-CMD ["torchserve", "--start", "--model-store", "models", "--models", "bot=wafl-llm.mar", "--foreground"]
+CMD ["torchserve", "--start", "--model-store models", \
+     "--models", "bot=wafl-llm.mar", "entailment=entailment.mar", "--foreground"]
