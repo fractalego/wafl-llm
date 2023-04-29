@@ -1,1 +1,1 @@
-build . -t wafl-llm
+docker build . -t wafl-llm

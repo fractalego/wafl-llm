@@ -29,5 +29,5 @@ RUN torch-model-archiver --model-name "entailment" --version 0.0.1 \
 
 
 COPY config.properties /app/
-CMD ["torchserve", "--start", "--model-store models", \
+CMD ["torchserve", "--start", "--model-store", "models", \
      "--models", "bot=wafl-llm.mar", "entailment=entailment.mar", "--foreground"]
