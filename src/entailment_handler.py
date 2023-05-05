@@ -23,16 +23,18 @@ class EntailmentHandler(BaseHandler):
         _logger.info(f"Loading the model {model_name}.")
 
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        #ds_engine = deepspeed.init_inference(
-        #
-        #    mp_size=1,
-        #    dtype=torch.half,
-        #    checkpoint=None,
-        #    replace_method="auto",
-        #    replace_with_kernel_inject=True,
-        #)
-        self.model = AutoModelForSequenceClassification.from_pretrained(model_name).half().cuda()
-        #self.model = ds_engine.module
+        ds_engine = deepspeed.init_inference(
+            AutoModelForSequenceClassification.from_pretrained(model_name),
+            mp_size=1,
+            dtype=torch.half,
+            checkpoint=None,
+            replace_method="auto",
+            replace_with_kernel_inject=True,
+        )
+        #self.model = AutoModelForSequenceClassification.from_pretrained(model_name)
+
+        #self.model = self.model.half().cuda()
+        self.model = ds_engine.module
         self.model.eval()
 
         _logger.info("Entailment model loaded successfully.")

@@ -5,6 +5,7 @@ import torch
 
 from transformers import AutoTokenizer
 from transformers import AutoModelForCausalLM
+from optimum.bettertransformer import BetterTransformer
 from ts.torch_handler.base_handler import BaseHandler
 
 _path = os.path.dirname(__file__)
@@ -26,7 +27,10 @@ class ChatbotHandler(BaseHandler):
             model_name, padding_side="left"
         )
         self.tokenizer.truncation_side = 'left'
-        model = AutoModelForCausalLM.from_pretrained(model_name)
+        model = AutoModelForCausalLM.from_pretrained(model_name) #, load_in_8bit=True, device_map="auto")
+        model = BetterTransformer.transform(model, keep_original_model=True)
+        #self.model = torch.compile(model.half().cuda())
+
         ds_engine = deepspeed.init_inference(
             model,
             mp_size=1,
@@ -36,7 +40,6 @@ class ChatbotHandler(BaseHandler):
             replace_with_kernel_inject=True,
             max_out_tokens=1024,
         )
-
         self.model = ds_engine.module
         self.model.eval()
 
@@ -64,6 +67,7 @@ class ChatbotHandler(BaseHandler):
                 num_beams=num_beams,
                 num_return_sequences=1,
                 pad_token_id=self.tokenizer.eos_token_id,
+                use_cache=True,
             )
 
     def postprocess(self, inference_output):
