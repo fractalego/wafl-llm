@@ -1,8 +1,11 @@
+import re
+
 import deepspeed
 import logging
 import os
 import torch
 
+from transformers import AutoConfig
 from transformers import AutoTokenizer
 from transformers import AutoModelForCausalLM
 from optimum.bettertransformer import BetterTransformer
@@ -20,15 +23,23 @@ class ChatbotHandler(BaseHandler):
 
     def initialize(self, ctx):
         self.manifest = ctx.manifest
-        model_name = "togethercomputer/GPT-JT-6B-v1"
+        model_name = "mosaicml/mpt-7b-instruct"
         _logger.info(f"Loading the model {model_name}.")
 
         self.tokenizer = AutoTokenizer.from_pretrained(
             model_name, padding_side="left"
         )
         self.tokenizer.truncation_side = 'left'
-        model = AutoModelForCausalLM.from_pretrained(model_name) #, load_in_8bit=True, device_map="auto")
-        model = BetterTransformer.transform(model, keep_original_model=True)
+        config = AutoConfig.from_pretrained(
+            model_name,
+            trust_remote_code=True
+        )
+        #config.attn_config['attn_impl'] = 'triton'
+        model = AutoModelForCausalLM.from_pretrained(model_name,
+                                                     config=config,
+                                                     torch_dtype=torch.bfloat16,
+                                                     trust_remote_code=True) #, load_in_8bit=True, device_map="auto")
+        #model = BetterTransformer.transform(model, keep_original_model=True)
         #self.model = torch.compile(model.half().cuda())
 
         ds_engine = deepspeed.init_inference(
@@ -61,7 +72,7 @@ class ChatbotHandler(BaseHandler):
             input_ids = data["input_ids"]
             num_beams = data["num_beams"]
             num_tokens = data["num_tokens"]
-            return self.model.generate(
+            output = self.model.generate(
                 input_ids,
                 max_new_tokens=num_tokens,
                 num_beams=num_beams,
@@ -69,9 +80,17 @@ class ChatbotHandler(BaseHandler):
                 pad_token_id=self.tokenizer.eos_token_id,
                 use_cache=True,
             )
+            output_ids = list(output[0][input_ids.shape[1]:])
+            if self.tokenizer.eos_token_id in output_ids:
+                output_ids = output_ids[:output_ids.index(self.tokenizer.eos_token_id)]
+
+            answer = self.tokenizer.decode(output_ids)
+            answer = re.sub(r"<\|.*\|>(.*)", r"\1", answer)
+            return answer
+
 
     def postprocess(self, inference_output):
-        return inference_output.tolist()
+        return [inference_output]
 
 
 _service = ChatbotHandler()
