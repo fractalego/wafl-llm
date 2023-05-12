@@ -3,7 +3,7 @@ sentencepiece==0.1.98
 torch==2.0.0
 accelerate==0.15.0
 bitsandbytes==0.37.2
-optimum[onnxruntime]==1.8.3
+optimum[onnxruntime]==1.8.5
 onnx==1.13.0
 onnxruntime==1.13.1
 onnxruntime-gpu==1.13.1
@@ -16,4 +16,5 @@ torch-model-archiver==0.7.1
 torch-workflow-archiver==0.2.6
 nvgpu==0.9.0
 peft==0.2.0
-triton==2.0.0
+flash-attn==1.0.3.post0
+triton==2.0.0.dev20221202

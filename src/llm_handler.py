@@ -34,10 +34,10 @@ class ChatbotHandler(BaseHandler):
             model_name,
             trust_remote_code=True
         )
-        #config.attn_config['attn_impl'] = 'triton'
+        config.attn_config['attn_impl'] = 'triton'
         model = AutoModelForCausalLM.from_pretrained(model_name,
                                                      config=config,
-                                                     torch_dtype=torch.bfloat16,
+                                                     torch_dtype=torch.half,
                                                      trust_remote_code=True) #, load_in_8bit=True, device_map="auto")
         #model = BetterTransformer.transform(model, keep_original_model=True)
         #self.model = torch.compile(model.half().cuda())
