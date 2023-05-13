@@ -31,9 +31,9 @@ class EntailmentHandler(BaseHandler):
             replace_method="auto",
             replace_with_kernel_inject=True,
         )
-        #self.model = AutoModelForSequenceClassification.from_pretrained(model_name)
+        # self.model = AutoModelForSequenceClassification.from_pretrained(model_name)
 
-        #self.model = self.model.half().cuda()
+        # self.model = self.model.half().cuda()
         self.model = ds_engine.module
         self.model.eval()
 

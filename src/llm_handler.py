@@ -26,21 +26,15 @@ class ChatbotHandler(BaseHandler):
         model_name = "mosaicml/mpt-7b-instruct"
         _logger.info(f"Loading the model {model_name}.")
 
-        self.tokenizer = AutoTokenizer.from_pretrained(
-            model_name, padding_side="left"
-        )
-        self.tokenizer.truncation_side = 'left'
-        config = AutoConfig.from_pretrained(
-            model_name,
-            trust_remote_code=True
-        )
-        config.attn_config['attn_impl'] = 'triton'
-        model = AutoModelForCausalLM.from_pretrained(model_name,
-                                                     config=config,
-                                                     torch_dtype=torch.half,
-                                                     trust_remote_code=True) #, load_in_8bit=True, device_map="auto")
-        #model = BetterTransformer.transform(model, keep_original_model=True)
-        #self.model = torch.compile(model.half().cuda())
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name, padding_side="left")
+        self.tokenizer.truncation_side = "left"
+        config = AutoConfig.from_pretrained(model_name, trust_remote_code=True)
+        config.attn_config["attn_impl"] = "triton"
+        model = AutoModelForCausalLM.from_pretrained(
+            model_name, config=config, torch_dtype=torch.half, trust_remote_code=True
+        )  # , load_in_8bit=True, device_map="auto")
+        # model = BetterTransformer.transform(model, keep_original_model=True)
+        # self.model = torch.compile(model.half().cuda())
 
         ds_engine = deepspeed.init_inference(
             model,
@@ -56,11 +50,14 @@ class ChatbotHandler(BaseHandler):
 
         _logger.info("Transformer model loaded successfully.")
         self.initialized = True
+
     def preprocess(self, data):
         text = data[0].get("body").get("data")
         num_beams = data[0].get("body").get("num_beams")
         num_tokens = data[0].get("body").get("num_tokens")
-        input_ids = self.tokenizer.encode(text, return_tensors="pt", truncation=True, max_length=1008).cuda()
+        input_ids = self.tokenizer.encode(
+            text, return_tensors="pt", truncation=True, max_length=1008
+        ).cuda()
         return {
             "input_ids": input_ids,
             "num_beams": num_beams,
@@ -80,14 +77,13 @@ class ChatbotHandler(BaseHandler):
                 pad_token_id=self.tokenizer.eos_token_id,
                 use_cache=True,
             )
-            output_ids = list(output[0][input_ids.shape[1]:])
+            output_ids = list(output[0][input_ids.shape[1] :])
             if self.tokenizer.eos_token_id in output_ids:
-                output_ids = output_ids[:output_ids.index(self.tokenizer.eos_token_id)]
+                output_ids = output_ids[: output_ids.index(self.tokenizer.eos_token_id)]
 
             answer = self.tokenizer.decode(output_ids)
             answer = re.sub(r"<\|.*\|>(.*)", r"\1", answer)
             return answer
-
 
     def postprocess(self, inference_output):
         return [inference_output]
