@@ -1,13 +1,11 @@
 import json
-
 import deepspeed
 import logging
 import os
-
-import numpy as np
 import torch
 
 from transformers import WhisperProcessor, WhisperForConditionalGeneration
+from optimum.bettertransformer import BetterTransformer
 from ts.torch_handler.base_handler import BaseHandler
 
 _path = os.path.dirname(__file__)
@@ -30,8 +28,7 @@ class WhisperHandler(BaseHandler):
 
         self.model = WhisperForConditionalGeneration.from_pretrained(model_name)
         self.processor = WhisperProcessor.from_pretrained(model_name)
-        # model = BetterTransformer.transform(model, keep_original_model=True)
-        # self.model = torch.compile(model.half().cuda())
+        self.model = BetterTransformer.transform(self.model, keep_original_model=True)
 
         ds_engine = deepspeed.init_inference(
             self.model,
@@ -66,6 +63,7 @@ class WhisperHandler(BaseHandler):
                 ],
                 dtype=torch.int
             ).unsqueeze(0)
+
         return {
             "input_features": input_features.cuda().half(),
             "num_beams": num_beams,

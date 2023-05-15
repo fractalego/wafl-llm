@@ -8,7 +8,6 @@ import torch
 from transformers import AutoConfig
 from transformers import AutoTokenizer
 from transformers import AutoModelForCausalLM
-from optimum.bettertransformer import BetterTransformer
 from ts.torch_handler.base_handler import BaseHandler
 
 _path = os.path.dirname(__file__)
@@ -32,10 +31,7 @@ class ChatbotHandler(BaseHandler):
         config.attn_config["attn_impl"] = "triton"
         model = AutoModelForCausalLM.from_pretrained(
             model_name, config=config, torch_dtype=torch.half, trust_remote_code=True
-        )  # , load_in_8bit=True, device_map="auto")
-        # model = BetterTransformer.transform(model, keep_original_model=True)
-        # self.model = torch.compile(model.half().cuda())
-
+        )
         ds_engine = deepspeed.init_inference(
             model,
             mp_size=1,
@@ -82,7 +78,8 @@ class ChatbotHandler(BaseHandler):
                 output_ids = output_ids[: output_ids.index(self.tokenizer.eos_token_id)]
 
             answer = self.tokenizer.decode(output_ids)
-            answer = re.sub(r"<\|.*\|>(.*)", r"\1", answer)
+            answer = re.sub(r"(.*)<\|.*\|>(.*)", r"\1<|END|>", answer)
+            answer = re.sub(r"(.*)#", r"\1<|END|>", answer)
             return answer
 
     def postprocess(self, inference_output):
