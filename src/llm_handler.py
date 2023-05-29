@@ -28,7 +28,6 @@ class ChatbotHandler(BaseHandler):
         self.tokenizer = AutoTokenizer.from_pretrained(model_name, padding_side="left")
         self.tokenizer.truncation_side = "left"
         config = AutoConfig.from_pretrained(model_name, trust_remote_code=True)
-        config.attn_config["attn_impl"] = "triton"
         model = AutoModelForCausalLM.from_pretrained(
             model_name, config=config, torch_dtype=torch.half, trust_remote_code=True
         )
