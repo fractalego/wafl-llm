@@ -39,9 +39,7 @@ class SpeakerHandler(BaseHandler):
         text = data[0].get("body").get("text")
         sample = TTSHubInterface.get_model_input(self._task, text)
         sample["net_input"]["src_tokens"] = sample["net_input"]["src_tokens"].cuda()
-        return {
-            "sample": sample
-        }
+        return {"sample": sample}
 
     def inference(self, data):
         with torch.no_grad():
@@ -49,16 +47,6 @@ class SpeakerHandler(BaseHandler):
             wav, rate = TTSHubInterface.get_prediction(
                 self._task, self._model, self._generator, sample
             )
-            #self._p = pyaudio.PyAudio()
-            #stream = self._p.open(
-            #    format=pyaudio.paFloat32,
-            #    channels=1,
-            #    rate=rate,
-            #    output=True,
-            #)
-            #stream.write(wav.cpu().numpy().tobytes())
-            #stream.stop_stream()
-            #stream.close()
             return {
                 "wav": base64.b64encode(wav.cpu().numpy().tobytes()).decode("utf-8"),
                 "rate": rate,

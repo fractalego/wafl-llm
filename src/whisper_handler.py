@@ -61,7 +61,7 @@ class WhisperHandler(BaseHandler):
                     for item in self.processor.tokenizer.encode(f" {hotword}")
                     if item not in set(self._ending_tokens + self._starting_tokens)
                 ],
-                dtype=torch.int
+                dtype=torch.int,
             ).unsqueeze(0)
 
         return {
@@ -92,9 +92,7 @@ class WhisperHandler(BaseHandler):
             score = output.sequences_scores
             logp = None
             if hotword_tokens is not None:
-                logp = self.compute_logp(
-                    hotword_tokens, input_features
-                )
+                logp = self.compute_logp(hotword_tokens, input_features)
 
             return {
                 "transcription": transcription,

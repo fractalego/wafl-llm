@@ -33,24 +33,19 @@ class SentenceEmbedderHandler(BaseHandler):
     def preprocess(self, data):
         text = data[0].get("body").get("text")
         model_name = data[0].get("body").get("model_name")
-        return {
-            "text": text,
-            "model_name": model_name
-        }
+        return {"text": text, "model_name": model_name}
 
     def inference(self, data):
         with torch.no_grad():
             text = data["text"]
             model_name = data["model_name"]
             if model_name not in self._sentence_transfomers_dict:
-                return {
-                    "embedding": []
-                }
+                return {"embedding": []}
 
-            vector = self._sentence_transfomers_dict[model_name].encode(text, show_progress_bar=False)
-            return {
-                "embedding": vector.tolist()
-            }
+            vector = self._sentence_transfomers_dict[model_name].encode(
+                text, show_progress_bar=False
+            )
+            return {"embedding": vector.tolist()}
 
     def postprocess(self, inference_output):
         return [inference_output]
