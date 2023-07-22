@@ -1,3 +1,4 @@
+import json
 import deepspeed
 import logging
 import os
@@ -16,10 +17,11 @@ class EntailmentHandler(BaseHandler):
         super().__init__()
         self.initialized = False
         _logger.info("The handler is created!")
+        self._config = json.load(open(os.path.join(_path, "config.json"), "r"))
 
     def initialize(self, ctx):
         self.manifest = ctx.manifest
-        model_name = "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli"
+        model_name = self._config["entailment_model"]
         _logger.info(f"Loading the model {model_name}.")
 
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)

@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import torch
@@ -14,18 +15,15 @@ class SentenceEmbedderHandler(BaseHandler):
         super().__init__()
         self.initialized = False
         _logger.info("The handler is created!")
+        self._config = json.load(open(os.path.join(_path, "config.json"), "r"))
 
     def initialize(self, ctx):
         self.manifest = ctx.manifest
-        model_names = ["msmarco-distilbert-base-v3", "multi-qa-distilbert-dot-v1"]
+        model_names = self._config["sentence_embedder_models"]
         _logger.info(f"Loading the models {model_names}.")
         self._sentence_transfomers_dict = {
-            "msmarco-distilbert-base-v3": SentenceTransformer(
-                "msmarco-distilbert-base-v3", device="cuda"
-            ),
-            "multi-qa-distilbert-dot-v1": SentenceTransformer(
-                "multi-qa-distilbert-dot-v1", device="cuda"
-            ),
+            model_name: SentenceTransformer(model_name, device="cuda")
+            for model_name in model_names
         }
         _logger.info("sentence transformers model loaded successfully.")
         self.initialized = True

@@ -1,3 +1,5 @@
+import json
+
 import deepspeed
 import logging
 import os
@@ -33,10 +35,11 @@ class ChatbotHandler(BaseHandler):
         super().__init__()
         self.initialized = False
         _logger.info("The handler is created!")
+        self._config = json.load(open(os.path.join(_path, "config.json"), "r"))
 
     def initialize(self, ctx):
         self.manifest = ctx.manifest
-        model_name = "mosaicml/mpt-7b-instruct"
+        model_name = self._config["llm_model"]
         _logger.info(f"Loading the model {model_name}.")
 
         self.tokenizer = AutoTokenizer.from_pretrained(model_name, padding_side="left")

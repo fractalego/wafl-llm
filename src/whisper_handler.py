@@ -20,10 +20,11 @@ class WhisperHandler(BaseHandler):
         super().__init__()
         self.initialized = False
         _logger.info("The handler is created!")
+        self._config = json.load(open(os.path.join(_path, "config.json"), "r"))
 
     def initialize(self, ctx):
         self.manifest = ctx.manifest
-        model_name = "fractalego/personal-whisper-medium.en-model"
+        model_name = self._config["whisper_model"]
         _logger.info(f"Loading the model {model_name}.")
 
         self.model = WhisperForConditionalGeneration.from_pretrained(model_name)

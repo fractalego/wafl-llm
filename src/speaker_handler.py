@@ -1,5 +1,4 @@
 import base64
-import deepspeed
 import json
 import logging
 import os
@@ -18,10 +17,11 @@ class SpeakerHandler(BaseHandler):
         super().__init__()
         self.initialized = False
         _logger.info("The handler is created!")
+        self._config = json.load(open(os.path.join(_path, "config.json"), "r"))
 
     def initialize(self, ctx):
         self.manifest = ctx.manifest
-        model_name = "facebook/fastspeech2-en-ljspeech"
+        model_name = self._config["speaker_model"]
         _logger.info(f"Loading the model {model_name}.")
         models, cfg, self._task = load_model_ensemble_and_task_from_hf_hub(
             model_name,
