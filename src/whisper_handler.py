@@ -13,9 +13,6 @@ _logger = logging.getLogger(__file__)
 
 
 class WhisperHandler(BaseHandler):
-    _starting_tokens = [50257, 50362]
-    _ending_tokens = [50256]
-
     def __init__(self):
         super().__init__()
         self.initialized = False
@@ -29,6 +26,12 @@ class WhisperHandler(BaseHandler):
 
         self.model = WhisperForConditionalGeneration.from_pretrained(model_name)
         self.processor = WhisperProcessor.from_pretrained(model_name)
+        self._starting_tokens = self.processor.tokenizer.convert_tokens_to_ids(
+            ["<|startoftranscript|>", "<|notimestamps|>"]
+        )
+        self._ending_tokens = self.processor.tokenizer.convert_tokens_to_ids(
+            ["<|endoftext|>"]
+        )
         self.model = BetterTransformer.transform(self.model, keep_original_model=True)
 
         ds_engine = deepspeed.init_inference(
