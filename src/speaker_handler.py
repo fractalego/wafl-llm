@@ -49,7 +49,7 @@ class SpeakerHandler(BaseHandler):
             )
             return {
                 "wav": base64.b64encode(wav.cpu().numpy().tobytes()).decode("utf-8"),
-                "rate": rate,
+                "rate": rate ,
             }
 
     def postprocess(self, inference_output):

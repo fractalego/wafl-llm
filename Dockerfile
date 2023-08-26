@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.2.0-cudnn8-devel-ubuntu20.04
+FROM nvidia/cuda:11.1.1-cudnn8-devel-ubuntu20.04
 RUN mkdir /app
 RUN mkdir /app/models
 RUN mkdir /app/src
@@ -20,6 +20,7 @@ RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
 RUN pip install --upgrade requests
 
 COPY ./src/ /app/src/
+COPY config.json /app/
 
 RUN torch-model-archiver --model-name "wafl-llm" --version 0.0.1 \
                          --handler /app/src/llm_handler.py --extra-files config.json --export-path /app/models/
@@ -38,10 +39,10 @@ RUN torch-model-archiver --model-name "sentence_embedder" --version 0.0.1 \
 
 COPY config.properties /app/
 CMD ["torchserve", "--start", "--model-store", "models", \
-     "--models",
-     "bot=wafl-llm.mar",
-     "entailment=entailment.mar",
-     "speaker=speaker.mar",
-     "whisper=whisper.mar",
-     "sentence_embedder=sentence_embedder.mar",
+     "--models", \
+     "bot=wafl-llm.mar", \
+     "entailment=entailment.mar", \
+     "speaker=speaker.mar", \
+     "whisper=whisper.mar", \
+     "sentence_embedder=sentence_embedder.mar", \
      "--foreground"]
