@@ -1,0 +1,7 @@
+{
+  "entailment_model": "MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli",
+  "llm_model": "mosaicml/mpt-7b-instruct",
+  "speaker_model": "facebook/fastspeech2-en-ljspeech",
+  "whisper_model": "fractalego/personal-whisper-medium.en-model",
+  "sentence_embedder_models": ["msmarco-distilbert-base-v3", "multi-qa-distilbert-dot-v1"]
+}
