@@ -45,20 +45,13 @@ class ChatbotHandler(BaseHandler):
         self.tokenizer = AutoTokenizer.from_pretrained(model_name, padding_side="left")
         self.tokenizer.truncation_side = "left"
         config = AutoConfig.from_pretrained(model_name, trust_remote_code=True)
-        config.init_device = "cuda"
-        self.model = deepspeed.init_inference(
-            AutoModelForCausalLM.from_pretrained(
+        self.model = AutoModelForCausalLM.from_pretrained(
                 model_name,
                 config=config,
                 torch_dtype=torch.half,
                 trust_remote_code=True,
-            ),
-            mp_size=1,
-            dtype=torch.half,
-            checkpoint=None,
-            replace_method="auto",
-            max_out_tokens=1024,
-        ).module
+            ).cuda()
+        self.model = torch.compile(self.model)
         self.model.eval()
         self._stop_at_eos = StopAtEOS(self.tokenizer)
         _logger.info("Transformer model loaded successfully.")
@@ -66,27 +59,26 @@ class ChatbotHandler(BaseHandler):
 
     def preprocess(self, data):
         text = data[0].get("body").get("data")
-        num_beams = data[0].get("body").get("num_beams")
+        temperature = data[0].get("body").get("temperature")
         num_tokens = data[0].get("body").get("num_tokens")
         input_ids = self.tokenizer.encode(
             text, return_tensors="pt", truncation=True, max_length=1008
         ).cuda()
         return {
             "input_ids": input_ids,
-            "num_beams": num_beams,
+            "temperature": temperature,
             "num_tokens": num_tokens,
         }
 
     def inference(self, data):
         with torch.no_grad():
             input_ids = data["input_ids"]
-            num_beams = data["num_beams"]
+            temperature = data["temperature"]
             num_tokens = data["num_tokens"]
             output = self.model.generate(
-                input_ids,
+                input_ids.cuda(),
                 max_new_tokens=num_tokens,
-                num_beams=num_beams,
-                num_return_sequences=1,
+                temperature=temperature,
                 pad_token_id=self.tokenizer.eos_token_id,
                 eos_token_id=self.tokenizer.eos_token_id,
                 use_cache=True,
@@ -98,7 +90,6 @@ class ChatbotHandler(BaseHandler):
 
             answer = self.tokenizer.decode(output_ids)
             answer = re.sub(r"(.*)<\|.*\|>(.*)", r"\1<|EOS|>", answer)
-            answer = re.sub(r"(.*)#", r"\1<|EOS|>", answer)
             return answer
 
     def postprocess(self, inference_output):
