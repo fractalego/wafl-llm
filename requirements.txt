@@ -1,8 +1,8 @@
-transformers==4.28.1
+transformers==4.33.3
 sentencepiece==0.1.98
 torch==2.0.0
-accelerate==0.15.0
-bitsandbytes==0.37.2
+accelerate==0.20.3
+bitsandbytes==0.41.1
 optimum==1.8.6
 onnx==1.13.0
 datasets==2.8.0

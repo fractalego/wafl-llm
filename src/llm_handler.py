@@ -6,6 +6,7 @@ import os
 import re
 import torch
 
+from typing import List
 from transformers import AutoConfig
 from transformers import AutoTokenizer
 from transformers import AutoModelForCausalLM
@@ -17,17 +18,19 @@ _logger = logging.getLogger(__file__)
 
 
 class StopAtEOS(StoppingCriteria):
-    def __init__(self, tokenizer, last_string="<|EOS|>"):
+    def __init__(self, tokenizer: "AutoTokenizer", last_strings: List[str]):
         self._tokenizer = tokenizer
-        self._last_string = last_string
+        self._last_strings = last_strings
 
     def __call__(
         self, input_ids: torch.LongTensor, scores: torch.FloatTensor, **kwargs
     ) -> bool:
         generated_text = self._tokenizer.decode(input_ids[0], skip_special_tokens=True)
-        return generated_text.rfind(self._last_string) == len(generated_text) - len(
-            self._last_string
-        )
+        for last_string in self._last_strings:
+            if generated_text.endswith(last_string):
+                return True
+
+        return False
 
 
 class ChatbotHandler(BaseHandler):
@@ -53,7 +56,6 @@ class ChatbotHandler(BaseHandler):
             ).cuda()
         self.model = torch.compile(self.model)
         self.model.eval()
-        self._stop_at_eos = StopAtEOS(self.tokenizer)
         _logger.info("Transformer model loaded successfully.")
         self.initialized = True
 
@@ -75,6 +77,13 @@ class ChatbotHandler(BaseHandler):
             input_ids = data["input_ids"]
             temperature = data["temperature"]
             num_tokens = data["num_tokens"]
+            if "last_strings" in data:
+                last_strings = data["last_strings"]
+
+            else:
+                last_strings = ["<|EOS|>", "\nuser:", "\nbot:"]
+
+            stop_at_eos = StopAtEOS(self.tokenizer, last_strings)
             output = self.model.generate(
                 input_ids.cuda(),
                 max_new_tokens=num_tokens,
@@ -82,7 +91,7 @@ class ChatbotHandler(BaseHandler):
                 pad_token_id=self.tokenizer.eos_token_id,
                 eos_token_id=self.tokenizer.eos_token_id,
                 use_cache=True,
-                stopping_criteria=[self._stop_at_eos],
+                stopping_criteria=[stop_at_eos],
             )
             output_ids = list(output[0][input_ids.shape[1] :])
             if self.tokenizer.eos_token_id in output_ids:
