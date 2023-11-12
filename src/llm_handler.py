@@ -63,13 +63,17 @@ class ChatbotHandler(BaseHandler):
         text = data[0].get("body").get("data")
         temperature = data[0].get("body").get("temperature")
         num_tokens = data[0].get("body").get("num_tokens")
+        last_strings = data[0].get("body").get("last_strings")
+        num_replicas = data[0].get("body").get("num_replicas")
         input_ids = self.tokenizer.encode(
-            text, return_tensors="pt", truncation=True, max_length=1008
+            text, return_tensors="pt", truncation=True, max_length=8191
         ).cuda()
         return {
             "input_ids": input_ids,
             "temperature": temperature,
             "num_tokens": num_tokens,
+            "last_strings": last_strings,
+            "num_replicas": num_replicas,
         }
 
     def inference(self, data):
@@ -77,29 +81,22 @@ class ChatbotHandler(BaseHandler):
             input_ids = data["input_ids"]
             temperature = data["temperature"]
             num_tokens = data["num_tokens"]
-            if "last_strings" in data:
-                last_strings = data["last_strings"]
-
-            else:
-                last_strings = ["<|EOS|>", "\nuser:", "\nbot:"]
-
+            last_strings = data["last_strings"]
+            num_replicas = data["num_replicas"]
             stop_at_eos = StopAtEOS(self.tokenizer, last_strings)
-            output = self.model.generate(
-                input_ids.cuda(),
-                max_new_tokens=num_tokens,
-                temperature=temperature,
-                pad_token_id=self.tokenizer.eos_token_id,
-                eos_token_id=self.tokenizer.eos_token_id,
-                use_cache=True,
-                stopping_criteria=[stop_at_eos],
-            )
-            output_ids = list(output[0][input_ids.shape[1] :])
-            if self.tokenizer.eos_token_id in output_ids:
-                output_ids = output_ids[: output_ids.index(self.tokenizer.eos_token_id)]
-
-            answer = self.tokenizer.decode(output_ids)
-            answer = re.sub(r"(.*)<\|.*\|>(.*)", r"\1<|EOS|>", answer)
-            return answer
+            with torch.no_grad():
+                input_ids = torch.cat([input_ids] * num_replicas, dim=0)
+                output_ids = self.model.generate(
+                    input_ids.cuda(),
+                    max_new_tokens=num_tokens,
+                    temperature=temperature,
+                    do_sample=True,
+                    pad_token_id=self.tokenizer.eos_token_id,
+                    eos_token_id=self.tokenizer.eos_token_id,
+                    use_cache=True,
+                    stopping_criteria=[stop_at_eos],
+                )
+                return "<||>".join(self.tokenizer.batch_decode(output_ids[:, input_ids.shape[1]:]))
 
     def postprocess(self, inference_output):
         return [inference_output]
