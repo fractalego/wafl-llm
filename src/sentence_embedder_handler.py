@@ -38,7 +38,7 @@ class SentenceEmbedderHandler(BaseHandler):
             text = data["text"]
             model_name = data["model_name"]
             if model_name not in self._sentence_transfomers_dict:
-                return {"embedding": []}
+                return {"error": f"model {model_name} not found"}
 
             vector = self._sentence_transfomers_dict[model_name].encode(
                 text, show_progress_bar=False

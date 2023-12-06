@@ -25,9 +25,6 @@ COPY config.json /app/
 RUN torch-model-archiver --model-name "llm" --version 0.0.1 \
                          --handler /app/src/llm_handler.py --extra-files config.json --export-path /app/models/
 
-RUN torch-model-archiver --model-name "entailment" --version 0.0.1 \
-                         --handler /app/src/entailment_handler.py --extra-files config.json --export-path /app/models/
-
 RUN torch-model-archiver --model-name "speaker" --version 0.0.1 \
                          --handler /app/src/speaker_handler.py --extra-files config.json --export-path /app/models/
 
@@ -41,7 +38,6 @@ COPY config.properties /app/
 CMD ["torchserve", "--start", "--model-store", "models", \
      "--models", \
      "bot=llm.mar", \
-     "entailment=entailment.mar", \
      "speaker=speaker.mar", \
      "whisper=whisper.mar", \
      "sentence_embedder=sentence_embedder.mar", \
