@@ -26,7 +26,6 @@ class StopAtEOS(StoppingCriteria):
         self, input_ids: torch.LongTensor, scores: torch.FloatTensor, **kwargs
     ) -> bool:
         num_ending_tokens = 0
-        max_endings = input_ids.shape[0]
         for token_ids in input_ids:
             generated_text = self._tokenizer.decode(token_ids)
             for last_string in self._last_strings:
@@ -34,7 +33,7 @@ class StopAtEOS(StoppingCriteria):
                     num_ending_tokens += 1
                     break
 
-            if num_ending_tokens >= max_endings:
+            if num_ending_tokens >= 1:
                 return True
 
         return False
@@ -60,7 +59,8 @@ class ChatbotHandler(BaseHandler):
                 config=config,
                 torch_dtype=torch.half,
                 trust_remote_code=True,
-            ).cuda()
+                device_map="cuda",
+            )
         self.model = torch.compile(self.model)
         self.model.eval()
         _logger.info("Transformer model loaded successfully.")
@@ -90,6 +90,7 @@ class ChatbotHandler(BaseHandler):
             num_tokens = data["num_tokens"]
             last_strings = data["last_strings"]
             num_replicas = data["num_replicas"]
+            print("LAST_STRINGS!", last_strings)
             stop_at_eos = StopAtEOS(self.tokenizer, last_strings)
             with torch.no_grad():
                 input_ids = torch.cat([input_ids] * num_replicas, dim=0)
