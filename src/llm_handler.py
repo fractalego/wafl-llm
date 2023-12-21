@@ -6,6 +6,7 @@ import os
 import re
 import torch
 
+from typing import List
 from transformers import AutoConfig
 from transformers import AutoTokenizer
 from transformers import AutoModelForCausalLM
@@ -17,17 +18,25 @@ _logger = logging.getLogger(__file__)
 
 
 class StopAtEOS(StoppingCriteria):
-    def __init__(self, tokenizer, last_string="<|EOS|>"):
+    def __init__(self, tokenizer: "AutoTokenizer", last_strings: List[str]):
         self._tokenizer = tokenizer
-        self._last_string = last_string
+        self._last_strings = last_strings
 
     def __call__(
         self, input_ids: torch.LongTensor, scores: torch.FloatTensor, **kwargs
     ) -> bool:
-        generated_text = self._tokenizer.decode(input_ids[0], skip_special_tokens=True)
-        return generated_text.rfind(self._last_string) == len(generated_text) - len(
-            self._last_string
-        )
+        num_ending_tokens = 0
+        for token_ids in input_ids:
+            generated_text = self._tokenizer.decode(token_ids)
+            for last_string in self._last_strings:
+                if generated_text.endswith(last_string):
+                    num_ending_tokens += 1
+                    break
+
+            if num_ending_tokens >= 1:
+                return True
+
+        return False
 
 
 class ChatbotHandler(BaseHandler):
@@ -45,61 +54,58 @@ class ChatbotHandler(BaseHandler):
         self.tokenizer = AutoTokenizer.from_pretrained(model_name, padding_side="left")
         self.tokenizer.truncation_side = "left"
         config = AutoConfig.from_pretrained(model_name, trust_remote_code=True)
-        config.init_device = "cuda"
-        self.model = deepspeed.init_inference(
-            AutoModelForCausalLM.from_pretrained(
+        self.model = AutoModelForCausalLM.from_pretrained(
                 model_name,
                 config=config,
+                #use_flash_attention_2=True,
                 torch_dtype=torch.half,
                 trust_remote_code=True,
-            ),
-            mp_size=1,
-            dtype=torch.half,
-            checkpoint=None,
-            replace_method="auto",
-            max_out_tokens=1024,
-        ).module
+                device_map="cuda",
+            )
+        self.model = torch.compile(self.model)
         self.model.eval()
-        self._stop_at_eos = StopAtEOS(self.tokenizer)
         _logger.info("Transformer model loaded successfully.")
         self.initialized = True
 
     def preprocess(self, data):
         text = data[0].get("body").get("data")
-        num_beams = data[0].get("body").get("num_beams")
+        temperature = data[0].get("body").get("temperature")
         num_tokens = data[0].get("body").get("num_tokens")
+        last_strings = data[0].get("body").get("last_strings")
+        num_replicas = data[0].get("body").get("num_replicas")
         input_ids = self.tokenizer.encode(
-            text, return_tensors="pt", truncation=True, max_length=1008
+            text, return_tensors="pt", truncation=True, max_length=8191
         ).cuda()
         return {
             "input_ids": input_ids,
-            "num_beams": num_beams,
+            "temperature": temperature,
             "num_tokens": num_tokens,
+            "last_strings": last_strings,
+            "num_replicas": num_replicas,
         }
 
     def inference(self, data):
         with torch.no_grad():
             input_ids = data["input_ids"]
-            num_beams = data["num_beams"]
+            temperature = data["temperature"]
             num_tokens = data["num_tokens"]
-            output = self.model.generate(
-                input_ids,
-                max_new_tokens=num_tokens,
-                num_beams=num_beams,
-                num_return_sequences=1,
-                pad_token_id=self.tokenizer.eos_token_id,
-                eos_token_id=self.tokenizer.eos_token_id,
-                use_cache=True,
-                stopping_criteria=[self._stop_at_eos],
-            )
-            output_ids = list(output[0][input_ids.shape[1] :])
-            if self.tokenizer.eos_token_id in output_ids:
-                output_ids = output_ids[: output_ids.index(self.tokenizer.eos_token_id)]
-
-            answer = self.tokenizer.decode(output_ids)
-            answer = re.sub(r"(.*)<\|.*\|>(.*)", r"\1<|EOS|>", answer)
-            answer = re.sub(r"(.*)#", r"\1<|EOS|>", answer)
-            return answer
+            last_strings = data["last_strings"]
+            num_replicas = data["num_replicas"]
+            print("LAST_STRINGS!", last_strings)
+            stop_at_eos = StopAtEOS(self.tokenizer, last_strings)
+            with torch.no_grad():
+                input_ids = torch.cat([input_ids] * num_replicas, dim=0)
+                output_ids = self.model.generate(
+                    input_ids.cuda(),
+                    max_new_tokens=num_tokens,
+                    temperature=temperature,
+                    do_sample=True,
+                    pad_token_id=self.tokenizer.eos_token_id,
+                    eos_token_id=self.tokenizer.eos_token_id,
+                    use_cache=True,
+                    stopping_criteria=[stop_at_eos],
+                )
+                return "<||>".join(self.tokenizer.batch_decode(output_ids[:, input_ids.shape[1]:]))
 
     def postprocess(self, inference_output):
         return [inference_output]

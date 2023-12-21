@@ -22,11 +22,8 @@ RUN pip install --upgrade requests
 COPY ./src/ /app/src/
 COPY config.json /app/
 
-RUN torch-model-archiver --model-name "wafl-llm" --version 0.0.1 \
+RUN torch-model-archiver --model-name "llm" --version 0.0.1 \
                          --handler /app/src/llm_handler.py --extra-files config.json --export-path /app/models/
-
-RUN torch-model-archiver --model-name "entailment" --version 0.0.1 \
-                         --handler /app/src/entailment_handler.py --extra-files config.json --export-path /app/models/
 
 RUN torch-model-archiver --model-name "speaker" --version 0.0.1 \
                          --handler /app/src/speaker_handler.py --extra-files config.json --export-path /app/models/
@@ -40,8 +37,7 @@ RUN torch-model-archiver --model-name "sentence_embedder" --version 0.0.1 \
 COPY config.properties /app/
 CMD ["torchserve", "--start", "--model-store", "models", \
      "--models", \
-     "bot=wafl-llm.mar", \
-     "entailment=entailment.mar", \
+     "bot=llm.mar", \
      "speaker=speaker.mar", \
      "whisper=whisper.mar", \
      "sentence_embedder=sentence_embedder.mar", \
