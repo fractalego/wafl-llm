@@ -16,6 +16,7 @@ RUN apt install -y nvidia-utils-470 nvidia-driver-470
 RUN apt install -y openjdk-11-jdk
 RUN apt install -y python3 python3-pip
 RUN apt install -y libopenmpi-dev
+RUN apt install -y python3-packaging
 RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
 RUN pip install --upgrade requests
 
