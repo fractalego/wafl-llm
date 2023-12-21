@@ -1,4 +1,4 @@
-# WAFL-llm /home/alce/work/home/alce/src/wafl_llm/config.json
+# WAFL-llm
 
 WAFL is built to run as a two-part system.
 Both can be installed on the same machine.

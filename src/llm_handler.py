@@ -57,7 +57,6 @@ class ChatbotHandler(BaseHandler):
         self.model = AutoModelForCausalLM.from_pretrained(
                 model_name,
                 config=config,
-                #use_flash_attention_2=True,
                 torch_dtype=torch.half,
                 trust_remote_code=True,
                 device_map="cuda",
