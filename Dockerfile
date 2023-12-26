@@ -1,7 +1,7 @@
 FROM nvidia/cuda:11.1.1-cudnn8-devel-ubuntu20.04
 RUN mkdir /app
 RUN mkdir /app/models
-RUN mkdir /app/src
+RUN mkdir /app/wafl_llm
 
 WORKDIR /app
 
@@ -20,20 +20,20 @@ RUN apt install -y python3-packaging
 RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
 RUN pip install --upgrade requests
 
-COPY ./src/ /app/src/
+COPY ./wafl_llm/ /app/wafl_llm/
 COPY config.json /app/
 
 RUN torch-model-archiver --model-name "llm" --version 0.0.1 \
-                         --handler /app/src/llm_handler.py --extra-files config.json --export-path /app/models/
+                         --handler /app/wafl_llm/llm_handler.py --extra-files config.json --export-path /app/models/
 
 RUN torch-model-archiver --model-name "speaker" --version 0.0.1 \
-                         --handler /app/src/speaker_handler.py --extra-files config.json --export-path /app/models/
+                         --handler /app/wafl_llm/speaker_handler.py --extra-files config.json --export-path /app/models/
 
 RUN torch-model-archiver --model-name "whisper" --version 0.0.1 \
-                         --handler /app/src/whisper_handler.py --extra-files config.json --export-path /app/models/
+                         --handler /app/wafl_llm/whisper_handler.py --extra-files config.json --export-path /app/models/
 
 RUN torch-model-archiver --model-name "sentence_embedder" --version 0.0.1 \
-                         --handler /app/src/sentence_embedder_handler.py --extra-files config.json --export-path /app/models/
+                         --handler /app/wafl_llm/sentence_embedder_handler.py --extra-files config.json --export-path /app/models/
 
 COPY config.properties /app/
 CMD ["torchserve", "--start", "--model-store", "models", \
