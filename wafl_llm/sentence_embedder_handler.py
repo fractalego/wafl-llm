@@ -32,9 +32,7 @@ class SentenceEmbedderHandler(BaseHandler):
     def inference(self, data):
         with torch.no_grad():
             text = data["text"]
-            vector = self._model.encode(
-                text, show_progress_bar=False
-            )
+            vector = self._model.encode(text, show_progress_bar=False)
             return {"embedding": vector.tolist()}
 
     def postprocess(self, inference_output):

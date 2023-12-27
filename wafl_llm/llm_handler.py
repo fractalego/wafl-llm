@@ -55,12 +55,12 @@ class ChatbotHandler(BaseHandler):
         self.tokenizer.truncation_side = "left"
         config = AutoConfig.from_pretrained(model_name, trust_remote_code=True)
         self.model = AutoModelForCausalLM.from_pretrained(
-                model_name,
-                config=config,
-                torch_dtype=torch.half,
-                trust_remote_code=True,
-                device_map="cuda",
-            )
+            model_name,
+            config=config,
+            torch_dtype=torch.half,
+            trust_remote_code=True,
+            device_map="cuda",
+        )
         self.model = torch.compile(self.model)
         self.model.eval()
         _logger.info("Transformer model loaded successfully.")
@@ -104,7 +104,9 @@ class ChatbotHandler(BaseHandler):
                     use_cache=True,
                     stopping_criteria=[stop_at_eos],
                 )
-                return "<||>".join(self.tokenizer.batch_decode(output_ids[:, input_ids.shape[1]:]))
+                return "<||>".join(
+                    self.tokenizer.batch_decode(output_ids[:, input_ids.shape[1] :])
+                )
 
     def postprocess(self, inference_output):
         return [inference_output]
