@@ -3,6 +3,8 @@ import sys
 
 from wafl_llm.variables import get_variables
 
+_path = os.path.dirname(__file__)
+
 
 def print_incipit():
     print()
@@ -22,7 +24,35 @@ def add_cwd_to_syspath():
 
 
 def start_llm_server():
-    pass ####
+    services = ["llm", "sentence_embedder", "whisper", "speaker"]
+    if not os.path.exists(f"models"):
+        os.system(f"mkdir -p models")
+
+    for service in services:
+        if os.path.exists(f"models/{service}.mar"):
+            continue
+
+        print(f"Creating {service}.mar")
+        os.system(
+            f"torch-model-archiver --model-name '{service}' --version 0.0.1 "
+            f"--handler {_path}/{service}_handler.py "
+            f"--extra-files {_path}/config.json "
+            f"--export-path models/"
+        )
+
+    os.system(
+        f"cp {_path}/config.properties ./config.properties"
+    )
+
+    os.system(
+        "torchserve --start --model-store models "
+        "--models "
+        "bot=llm.mar "
+        "speaker=speaker.mar "
+        "whisper=whisper.mar "
+        "sentence_embedder=sentence_embedder.mar "
+        "--foreground "
+    )
 
 
 def process_cli():
@@ -33,7 +63,7 @@ def process_cli():
     if len(arguments) > 1:
         command = arguments[1]
 
-        if command == "start_llm":
+        if command == "start":
             start_llm_server()
 
         else:

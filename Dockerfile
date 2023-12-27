@@ -24,16 +24,16 @@ COPY ./wafl_llm/ /app/wafl_llm/
 COPY config.json /app/
 
 RUN torch-model-archiver --model-name "llm" --version 0.0.1 \
-                         --handler /app/wafl_llm/llm_handler.py --extra-files config.json --export-path /app/models/
+                         --handler /app/wafl_llm/llm_handler.py --extra-files /app/wafl_llm/models/config.json --export-path /app/models/
 
 RUN torch-model-archiver --model-name "speaker" --version 0.0.1 \
-                         --handler /app/wafl_llm/speaker_handler.py --extra-files config.json --export-path /app/models/
+                         --handler /app/wafl_llm/speaker_handler.py --extra-files /app/wafl_llm/models/config.json --export-path /app/models/
 
 RUN torch-model-archiver --model-name "whisper" --version 0.0.1 \
-                         --handler /app/wafl_llm/whisper_handler.py --extra-files config.json --export-path /app/models/
+                         --handler /app/wafl_llm/whisper_handler.py --extra-files /app/wafl_llm/models/config.json --export-path /app/models/
 
 RUN torch-model-archiver --model-name "sentence_embedder" --version 0.0.1 \
-                         --handler /app/wafl_llm/sentence_embedder_handler.py --extra-files config.json --export-path /app/models/
+                         --handler /app/wafl_llm/sentence_embedder_handler.py --extra-files /app/wafl_llm/models/config.json --export-path /app/models/
 
 COPY config.properties /app/
 CMD ["torchserve", "--start", "--model-store", "models", \

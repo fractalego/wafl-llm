@@ -17,6 +17,10 @@ setup(
         "wafl_llm",
     ],
     package_data={
+        "wafl_llm": [
+            "config.json",
+            "config.properties",
+        ],
     },
     install_requires=[
         "torch == 2.0.0",
@@ -30,14 +34,13 @@ setup(
         "deepspeed == 0.9.2",
         "mpi4py == 3.1.4",
         "torchserve == 0.7.1",
-        "torch - model - archiver == 0.7.1",
-        "torch - workflow - archiver == 0.2.6",
+        "torch-model-archiver == 0.7.1",
+        "torch-workflow-archiver == 0.2.6",
         "nvgpu == 0.9.0",
         "fairseq == 0.12.2",
         "g2p_en == 2.1.0",
         "sentence_transformers == 2.2.2",
         "einops == 0.6.1",
-
     ],
     classifiers=[
         "License :: OSI Approved :: MIT License",
