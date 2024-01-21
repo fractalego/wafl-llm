@@ -19,6 +19,14 @@ wafl-llm start
 ```
 which will use the default models and start the server on port 8080.
 
+The installation will require MPI and Java installed on the system.
+One can install both with the following commands
+```bash
+sudo apt install libopenmpi-dev
+sudo apt install default-jdk
+```
+
+
 
 #### Docker
 A docker image can be used to run it as in the following:
