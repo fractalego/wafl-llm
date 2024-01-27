@@ -31,7 +31,7 @@ A use-case specific configuration can be set by creating a `config.json` file in
 The file should look like this (the default configuration)
 ```json
 {
-  "llm_model": "Deci/DeciLM-7B",
+  "llm_model": "mistralai/Mistral-7B-Instruct-v0.1",
   "speaker_model": "facebook/fastspeech2-en-ljspeech",
   "whisper_model": "fractalego/personal-whisper-distilled-model",
   "sentence_embedder_models": "TaylorAI/gte-tiny"
