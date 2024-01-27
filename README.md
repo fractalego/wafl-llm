@@ -19,6 +19,27 @@ wafl-llm start
 ```
 which will use the default models and start the server on port 8080.
 
+The installation will require MPI and Java installed on the system.
+One can install both with the following commands
+```bash
+sudo apt install libopenmpi-dev
+sudo apt install default-jdk
+```
+
+#### Configuration
+A use-case specific configuration can be set by creating a `config.json` file in the path where `wafl-llm start` is executed.
+The file should look like this (the default configuration)
+```json
+{
+  "llm_model": "Deci/DeciLM-7B",
+  "speaker_model": "facebook/fastspeech2-en-ljspeech",
+  "whisper_model": "fractalego/personal-whisper-distilled-model",
+  "sentence_embedder_models": "TaylorAI/gte-tiny"
+}
+```
+
+The models are downloaded from the HugggingFace repository. Any other compatible model should work.
+
 
 #### Docker
 A docker image can be used to run it as in the following:
