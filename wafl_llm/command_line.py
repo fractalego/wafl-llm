@@ -1,10 +1,11 @@
 import os
 import sys
+import shutil
 
 from wafl_llm.variables import get_variables
 
 _path = os.path.dirname(__file__)
-
+_running_path = os.getcwd()
 
 def print_incipit():
     print()
@@ -25,8 +26,21 @@ def add_cwd_to_syspath():
 
 def start_llm_server():
     services = ["llm", "sentence_embedder", "whisper", "speaker"]
-    if not os.path.exists(f"models"):
-        os.system(f"mkdir -p models")
+    if os.path.exists("models"):
+        print("Removing the prior models/ directory.")
+        shutil.rmtree("models/")
+
+    os.system(f"mkdir -p models")
+
+    log_dir = f"{_running_path}/logs/"
+    if os.path.exists(log_dir):
+        print("Removing the prior logs/ directory.")
+        shutil.rmtree(log_dir)
+
+    config_path = f"{_path}/config.json"
+    if os.path.exists("config.json"):
+        print("Found existing config.json in local directory.")
+        config_path = f"{_running_path}/config.json"
 
     for service in services:
         if os.path.exists(f"models/{service}.mar"):
@@ -36,7 +50,7 @@ def start_llm_server():
         os.system(
             f"torch-model-archiver --model-name '{service}' --version 0.0.1 "
             f"--handler {_path}/{service}_handler.py "
-            f"--extra-files {_path}/config.json "
+            f"--extra-files {config_path} "
             f"--export-path models/"
         )
 
