@@ -1,5 +1,4 @@
 import json
-import deepspeed
 import logging
 import os
 import torch
@@ -32,20 +31,8 @@ class WhisperHandler(BaseHandler):
         self._ending_tokens = self.processor.tokenizer.convert_tokens_to_ids(
             ["<|endoftext|>"]
         )
-        self.model = BetterTransformer.transform(self.model, keep_original_model=True)
-
-        ds_engine = deepspeed.init_inference(
-            self.model,
-            mp_size=1,
-            dtype=torch.half,
-            checkpoint=None,
-            replace_method="auto",
-            replace_with_kernel_inject=True,
-            max_out_tokens=1024,
-        )
-        self.model = ds_engine.module
-        self.model.eval()
-
+        self.model = BetterTransformer.transform(self.model, keep_original_model=True).cuda().half()
+        self.model = torch.compile(self.model)
         _logger.info("Whisper model loaded successfully.")
         self.initialized = True
 
@@ -140,7 +127,7 @@ def handle(data, context):
         data = _service.preprocess(data)
         data = _service.inference(data)
         data = _service.postprocess(data)
-
         return data
+
     except Exception as e:
         raise e

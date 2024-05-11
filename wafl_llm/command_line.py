@@ -93,3 +93,7 @@ def main():
     except RuntimeError as e:
         print(e)
         print("WAFL_LLM ended due to the exception above.")
+
+
+if __name__ == "__main__":
+    main()
