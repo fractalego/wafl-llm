@@ -1,5 +1,5 @@
 {
-  "llm_model": "mistralai/Mistral-7B-Instruct-v0.1",
+  "llm_model": "fractalego/wafl-mistral_v0.1",
   "speaker_model": "facebook/fastspeech2-en-ljspeech",
   "whisper_model": "fractalego/personal-whisper-distilled-model",
   "sentence_embedder_models": "TaylorAI/gte-tiny"
