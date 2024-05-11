@@ -5,6 +5,7 @@ import torch
 
 from vllm import LLM, SamplingParams
 from ts.torch_handler.base_handler import BaseHandler
+from wafl_llm.variables import get_variables
 
 _path = os.path.dirname(__file__)
 _logger = logging.getLogger(__file__)
@@ -54,7 +55,7 @@ class ChatbotHandler(BaseHandler):
             return "<||>".join(output.outputs[0].text for output in outputs)
 
     def postprocess(self, inference_output):
-        return [inference_output]
+        return [json.dumps({"prediction": inference_output, "status": "success", "version": get_variables()["version"]})]
 
 
 _service = ChatbotHandler()
