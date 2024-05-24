@@ -7,6 +7,7 @@ from wafl_llm.variables import get_variables
 _path = os.path.dirname(__file__)
 _running_path = os.getcwd()
 
+
 def print_incipit():
     print()
     print(f"Running WAFL_LLM version {get_variables()['version']}.")
@@ -54,9 +55,7 @@ def start_llm_server():
             f"--export-path models/"
         )
 
-    os.system(
-        f"cp {_path}/config.properties ./config.properties"
-    )
+    os.system(f"cp {_path}/config.properties ./config.properties")
 
     os.system(
         "torchserve --start --model-store models "
