@@ -35,7 +35,7 @@ class MistralHandler(BaseHandler):
         self.initialized = True
 
     def preprocess(self, data):
-        prompt = data[0].get("body").get("data")
+        prompt = self._get_text_prompt(data[0].get("body").get("data"))
         temperature = data[0].get("body").get("temperature")
         num_tokens = data[0].get("body").get("num_tokens")
         num_replicas = data[0].get("body").get("num_replicas")
@@ -74,3 +74,13 @@ class MistralHandler(BaseHandler):
                 }
             )
         ]
+
+    def _get_text_prompt(self, chat_template_dictionary):
+        prompt = chat_template_dictionary["system_prompt"]
+        prompt += "\n"
+        for item in chat_template_dictionary["conversation"]:
+            speaker = item["speaker"]
+            text = item["text"]
+            prompt += f"\n{speaker}: {text}"
+        prompt += "\nbot: "
+        return prompt
