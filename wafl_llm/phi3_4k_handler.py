@@ -28,6 +28,8 @@ class Phi3Mini4KHandler(BaseHandler):
             "</execute>\n",
             "</s>",
             "<|end|>",
+            "<|assistant|>",
+            "<|user|>",
             "\n\n---",
             "\n\n- output:",
             "\n\n- ai:",
