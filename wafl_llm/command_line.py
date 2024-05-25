@@ -7,7 +7,6 @@ from wafl_llm.variables import get_variables
 _path = os.path.dirname(__file__)
 _running_path = os.getcwd()
 
-
 def print_incipit():
     print()
     print(f"Running WAFL_LLM version {get_variables()['version']}.")
@@ -39,7 +38,7 @@ def start_llm_server():
         shutil.rmtree(log_dir)
 
     config_path = f"{_path}/config.json"
-    if os.path.exists("config.json"):
+    if os.path.exists("config.json"):   #### load right config.json
         print("Found existing config.json in local directory.")
         config_path = f"{_running_path}/config.json"
 
