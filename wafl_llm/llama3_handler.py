@@ -12,7 +12,7 @@ _path = os.path.dirname(__file__)
 _logger = logging.getLogger(__file__)
 
 
-class Phi3Mini4KHandler(BaseHandler):
+class DefaultLLMHandler(BaseHandler):
     def __init__(self, config):
         super().__init__()
         self.initialized = False
@@ -28,13 +28,6 @@ class Phi3Mini4KHandler(BaseHandler):
             "</execute>\n",
             "</s>",
             "<|end|>",
-            "<|assistant|>",
-            "<|user|>",
-            "\n\n---",
-            "\n\n- output:",
-            "\n\n- ai:",
-            "\n\n- user:",
-            "<delete_rule>"
         ]
 
     def initialize(self, ctx):
@@ -75,7 +68,7 @@ class Phi3Mini4KHandler(BaseHandler):
                 max_tokens=num_tokens,
             )
             outputs = self._llm.generate(prompts, sampling_params)
-            print(outputs[0].outputs[0].text)
+            print(outputs)
             return "<||>".join(output.outputs[0].text for output in outputs)
 
     def postprocess(self, inference_output):
@@ -91,6 +84,7 @@ class Phi3Mini4KHandler(BaseHandler):
 
     def _get_text_prompt(self, chat_template_dictionary):
         chat_template_list = []
+        chat_template_list.append({"role": "system", "content": chat_template_dictionary["system_prompt"]})
         for item in chat_template_dictionary["conversation"]:
             speaker = item["speaker"]
             text = item["text"]
@@ -98,14 +92,8 @@ class Phi3Mini4KHandler(BaseHandler):
                 chat_template_list.append({"role": "user", "content": text})
             if speaker.lower() in ["assistant", "bot"]:
                 chat_template_list.append({"role": "assistant", "content": text})
-        input_ids = self._tokenizer.encode("<|system|>\n" + chat_template_dictionary["system_prompt"] + "\n<|end|>\n")
-        input_ids = input_ids + self._tokenizer.apply_chat_template(chat_template_list)[1:]
+
         prompt = self._tokenizer.decode(
-            input_ids[1:]
+            self._tokenizer.apply_chat_template(chat_template_list)[1:]
         )
         return prompt
-
-    def _get_system_prompt_input_ids(self, chat_template_dictionary):
-        system_prompt = chat_template_dictionary["system_prompt"]
-        input_ids = self._tokenizer.encode(system_prompt)
-        return input_ids
