@@ -31,7 +31,11 @@ class WhisperHandler(BaseHandler):
         self._ending_tokens = self.processor.tokenizer.convert_tokens_to_ids(
             ["<|endoftext|>"]
         )
-        self.model = BetterTransformer.transform(self.model, keep_original_model=True).cuda().half()
+        self.model = (
+            BetterTransformer.transform(self.model, keep_original_model=True)
+            .cuda()
+            .half()
+        )
         self.model = torch.compile(self.model)
         _logger.info("Whisper model loaded successfully.")
         self.initialized = True

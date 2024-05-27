@@ -42,13 +42,7 @@ The models are downloaded from the HugggingFace repository. Any other compatible
 
 
 #### Docker
-A docker image can be used to run it as in the following:
-
-```bash
-$ docker run -p8080:8080 --env NVIDIA_DISABLE_REQUIRE=1 --gpus all fractalego/wafl-llm:latest
-```
-
-or one can clone this repository and run the following
+Run the following
 
 ```bash
 docker/build.sh

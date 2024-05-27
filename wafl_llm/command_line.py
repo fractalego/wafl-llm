@@ -38,7 +38,7 @@ def start_llm_server():
         shutil.rmtree(log_dir)
 
     config_path = f"{_path}/config.json"
-    if os.path.exists("config.json"):
+    if os.path.exists("config.json"):   #### load right config.json
         print("Found existing config.json in local directory.")
         config_path = f"{_running_path}/config.json"
 
@@ -54,9 +54,7 @@ def start_llm_server():
             f"--export-path models/"
         )
 
-    os.system(
-        f"cp {_path}/config.properties ./config.properties"
-    )
+    os.system(f"cp {_path}/config.properties ./config.properties")
 
     os.system(
         "torchserve --start --model-store models "
