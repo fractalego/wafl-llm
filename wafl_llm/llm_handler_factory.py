@@ -3,6 +3,7 @@ import logging
 import os
 
 from wafl_llm.default_handler import DefaultLLMHandler
+from wafl_llm.llama3_handler import Llama3LLMHandler
 from wafl_llm.mistral_handler import MistralHandler
 from wafl_llm.phi3_4k_handler import Phi3Mini4KHandler
 
@@ -22,6 +23,10 @@ class LLMHandlerFactory:
         elif handler_name == "fractalego/wafl-phi3-mini-4k":
             _logger.info("Selected Phi3 Mini Handler")
             return Phi3Mini4KHandler(self._config)
+
+        elif handler_name == "fractalego/wafl-llama-3-8B-instruct":
+            _logger.info("Selected Llama3 Handler")
+            return Llama3LLMHandler(self._config)
 
         else:
             _logger.error(f"*** Unknown LLM name: {handler_name}. Using the default handler. This may cause issues. ***")

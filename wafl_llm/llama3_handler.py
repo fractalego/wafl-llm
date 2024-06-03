@@ -12,7 +12,7 @@ _path = os.path.dirname(__file__)
 _logger = logging.getLogger(__file__)
 
 
-class DefaultLLMHandler(BaseHandler):
+class Llama3LLMHandler(BaseHandler):
     def __init__(self, config):
         super().__init__()
         self.initialized = False
