@@ -23,11 +23,13 @@ class Llama3LLMHandler(BaseHandler):
             "\nbot",
             "\nUser",
             "\nBot",
+            "\n\nComputer:"
             "<|EOS|>",
             "</remember>",
             "</execute>\n",
             "</s>",
-            "<|end|>",
+            "<|im_end|>",
+            "<|eot_id|>",
         ]
 
     def initialize(self, ctx):
@@ -69,7 +71,15 @@ class Llama3LLMHandler(BaseHandler):
             )
             outputs = self._llm.generate(prompts, sampling_params)
             print(outputs)
-            return "<||>".join(output.outputs[0].text for output in outputs)
+
+            generated_texts = "<||>".join(output.outputs[0].text for output in outputs)
+            generated_texts = (
+                generated_texts.replace("<|im_start|>assistant\n", "")
+                .replace("<|im_start|>user\n", "")
+                .replace("<|im_start|>system\n", "")
+                .replace("<|im_start|>bot\n", "")
+            )
+            return generated_texts
 
     def postprocess(self, inference_output):
         return [
@@ -84,7 +94,9 @@ class Llama3LLMHandler(BaseHandler):
 
     def _get_text_prompt(self, chat_template_dictionary):
         chat_template_list = []
-        chat_template_list.append({"role": "system", "content": chat_template_dictionary["system_prompt"]})
+        chat_template_list.append(
+            {"role": "system", "content": chat_template_dictionary["system_prompt"]}
+        )
         for item in chat_template_dictionary["conversation"]:
             speaker = item["speaker"]
             text = item["text"]
@@ -94,6 +106,6 @@ class Llama3LLMHandler(BaseHandler):
                 chat_template_list.append({"role": "assistant", "content": text})
 
         prompt = self._tokenizer.decode(
-            self._tokenizer.apply_chat_template(chat_template_list)[1:]
+            self._tokenizer.apply_chat_template(chat_template_list)
         )
         return prompt

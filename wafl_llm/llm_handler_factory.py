@@ -10,6 +10,7 @@ from wafl_llm.phi3_4k_handler import Phi3Mini4KHandler
 _path = os.path.dirname(__file__)
 _logger = logging.getLogger(__file__)
 
+
 class LLMHandlerFactory:
     def __init__(self):
         self._config = json.load(open("config.json"))
@@ -29,5 +30,7 @@ class LLMHandlerFactory:
             return Llama3LLMHandler(self._config)
 
         else:
-            _logger.error(f"*** Unknown LLM name: {handler_name}. Using the default handler. This may cause issues. ***")
+            _logger.error(
+                f"*** Unknown LLM name: {handler_name}. Using the default handler. This may cause issues. ***"
+            )
             DefaultLLMHandler(self._config)

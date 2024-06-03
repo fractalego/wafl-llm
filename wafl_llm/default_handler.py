@@ -83,7 +83,9 @@ class DefaultLLMHandler(BaseHandler):
 
     def _get_text_prompt(self, chat_template_dictionary):
         chat_template_list = []
-        chat_template_list.append({"role": "system", "content": chat_template_dictionary["system_prompt"]})
+        chat_template_list.append(
+            {"role": "system", "content": chat_template_dictionary["system_prompt"]}
+        )
         for item in chat_template_dictionary["conversation"]:
             speaker = item["speaker"]
             text = item["text"]
