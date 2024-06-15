@@ -24,6 +24,7 @@ class MistralHandler(BaseHandler):
             "</remember>",
             "</execute>\n",
             "</s>",
+            "[delete_rule]",
         ]
 
     def initialize(self, ctx):

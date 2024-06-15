@@ -12,25 +12,24 @@ _logger = logging.getLogger(__file__)
 
 
 class LLMHandlerFactory:
+    _handler_dictionary = {
+        "wafl-mistral_v0.1": MistralHandler,
+        "wafl-phi3-mini-4k": Phi3Mini4KHandler,
+        "wafl-phi3-mini-4k_v2": Phi3Mini4KHandler,
+        "wafl-llama-3-8B-instruct": Llama3LLMHandler,
+    }
+
     def __init__(self):
         self._config = json.load(open("config.json"))
 
     def get_llm_handler(self):
         handler_name = self._config["llm_model"]
-        if handler_name == "fractalego/wafl-mistral_v0.1":
-            _logger.info("Selected Mistral Handler")
-            return MistralHandler(self._config)
+        for key in self._handler_dictionary.keys():
+            if key in handler_name:
+                _logger.info(f"Selected {key} Handler")
+                return self._handler_dictionary[key](self._config)
 
-        elif handler_name == "fractalego/wafl-phi3-mini-4k":
-            _logger.info("Selected Phi3 Mini Handler")
-            return Phi3Mini4KHandler(self._config)
-
-        elif handler_name == "fractalego/wafl-llama-3-8B-instruct":
-            _logger.info("Selected Llama3 Handler")
-            return Llama3LLMHandler(self._config)
-
-        else:
-            _logger.error(
-                f"*** Unknown LLM name: {handler_name}. Using the default handler. This may cause issues. ***"
-            )
-            DefaultLLMHandler(self._config)
+        _logger.error(
+            f"*** Unknown LLM name: {handler_name}. Using the default handler. This may cause issues. ***"
+        )
+        return DefaultLLMHandler(self._config)

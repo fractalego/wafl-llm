@@ -34,7 +34,7 @@ class Phi3Mini4KHandler(BaseHandler):
             "\n\n- output:",
             "\n\n- ai:",
             "\n\n- user:",
-            "<delete_rule>",
+            "[delete_rule]",
         ]
 
     def initialize(self, ctx):
@@ -99,7 +99,7 @@ class Phi3Mini4KHandler(BaseHandler):
             if speaker.lower() in ["assistant", "bot"]:
                 chat_template_list.append({"role": "assistant", "content": text})
         input_ids = self._tokenizer.encode(
-            "<|system|>\n" + chat_template_dictionary["system_prompt"] + "\n<|end|>\n"
+            "<|system|>\n" + chat_template_dictionary["system_prompt"] + "\n<|end|><|assistant|>\n"
         )
         input_ids = (
             input_ids + self._tokenizer.apply_chat_template(chat_template_list)[1:]

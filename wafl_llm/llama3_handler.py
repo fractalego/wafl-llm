@@ -30,6 +30,7 @@ class Llama3LLMHandler(BaseHandler):
             "</s>",
             "<|im_end|>",
             "<|eot_id|>",
+            "[delete_rule]",
         ]
 
     def initialize(self, ctx):
