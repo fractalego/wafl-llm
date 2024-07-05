@@ -6,6 +6,7 @@ from wafl_llm.default_handler import DefaultLLMHandler
 from wafl_llm.llama3_handler import Llama3LLMHandler
 from wafl_llm.mistral_handler import MistralHandler
 from wafl_llm.phi3_4k_handler import Phi3Mini4KHandler
+from transformers import AutoConfig
 
 _path = os.path.dirname(__file__)
 _logger = logging.getLogger(__file__)
@@ -23,7 +24,8 @@ class LLMHandlerFactory:
         self._config = json.load(open("config.json"))
 
     def get_llm_handler(self):
-        handler_name = self._config["llm_model"]
+        model_path = self._config["llm_model"]
+        handler_name = AutoConfig.from_pretrained(model_path).model_type
         for key in self._handler_dictionary.keys():
             if key in handler_name:
                 _logger.info(f"Selected {key} Handler")
