@@ -89,6 +89,7 @@ class Llama3LLMHandler(BaseHandler):
                     "prediction": inference_output,
                     "status": "success",
                     "version": get_variables()["version"],
+                    "model": self._config["llm_model"],
                 }
             )
         ]

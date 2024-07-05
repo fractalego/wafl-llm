@@ -16,7 +16,6 @@ class LLMHandlerFactory:
     _handler_dictionary = {
         "wafl-mistral_v0.1": MistralHandler,
         "wafl-phi3-mini-4k": Phi3Mini4KHandler,
-        "wafl-phi3-mini-4k_v2": Phi3Mini4KHandler,
         "wafl-llama-3-8B-instruct": Llama3LLMHandler,
     }
 
@@ -25,7 +24,7 @@ class LLMHandlerFactory:
 
     def get_llm_handler(self):
         model_path = self._config["llm_model"]
-        handler_name = AutoConfig.from_pretrained(model_path).model_type
+        handler_name = AutoConfig.from_pretrained(model_path)._name_or_path
         for key in self._handler_dictionary.keys():
             if key in handler_name:
                 _logger.info(f"Selected {key} Handler")
