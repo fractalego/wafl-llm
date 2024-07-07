@@ -44,7 +44,6 @@ class Phi3Mini4KCPUHandler(BaseHandler):
         _logger.info(f"Loading the model {model_name}.")
         self._model = AutoModelForCausalLM.from_pretrained(
             model_name,
-            load_in_8bit=True,
         )
         _logger.info(f"Transformer model {model_name} loaded successfully.")
         self.initialized = True

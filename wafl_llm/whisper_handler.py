@@ -39,7 +39,7 @@ class WhisperHandler(BaseHandler):
         )
         if self._device == "cuda":
             self.model = torch.compile(self.model)
-
+            
         _logger.info("Whisper model loaded successfully.")
         self.initialized = True
 
@@ -63,10 +63,10 @@ class WhisperHandler(BaseHandler):
             ).unsqueeze(0)
 
         return {
-            "input_features": input_features.cuda().half(),
+            "input_features": input_features.to(self._device).half(),
             "num_beams": num_beams,
             "num_tokens": num_tokens,
-            "hotword_tokens": hotword_tokens.cuda().half()
+            "hotword_tokens": hotword_tokens.to(self._device).half()
             if hotword_tokens is not None
             else None,
         }
@@ -102,14 +102,14 @@ class WhisperHandler(BaseHandler):
         return [json.dumps(inference_output)]
 
     def compute_logp(self, hotword_tokens, input_features):
-        input_ids = torch.tensor([self._starting_tokens]).cuda()
+        input_ids = torch.tensor([self._starting_tokens]).to(self._device)
         for _ in range(hotword_tokens.shape[1]):
             logits = self.model(
                 input_features,
                 decoder_input_ids=input_ids,
             ).logits
             new_token = torch.argmax(logits, dim=-1)
-            new_token = torch.tensor([[new_token[:, -1]]]).cuda()
+            new_token = torch.tensor([[new_token[:, -1]]]).to(self._device)
             input_ids = torch.cat([input_ids, new_token], dim=-1)
 
         logprobs = torch.log(torch.softmax(logits, dim=-1))
