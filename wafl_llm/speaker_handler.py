@@ -22,6 +22,7 @@ class SpeakerHandler(BaseHandler):
     def initialize(self, ctx):
         self.manifest = ctx.manifest
         model_name = self._config["speaker_model"]
+        self._device = self._config["device"]
         _logger.info(f"Loading the model {model_name}.")
         models, cfg, self._task = load_model_ensemble_and_task_from_hf_hub(
             model_name,
@@ -30,15 +31,15 @@ class SpeakerHandler(BaseHandler):
         self._model = models[0]
         TTSHubInterface.update_cfg_with_data_cfg(cfg, self._task.data_cfg)
         self._generator = self._task.build_generator(models, cfg)
-        self._generator.model.cuda()
-        self._generator.vocoder.model.cuda()
+        self._generator.model.to(self._device)
+        self._generator.vocoder.model.to(self._device)
         _logger.info("Speaker model loaded successfully.")
         self.initialized = True
 
     def preprocess(self, data):
         text = data[0].get("body").get("text")
         sample = TTSHubInterface.get_model_input(self._task, text)
-        sample["net_input"]["src_tokens"] = sample["net_input"]["src_tokens"].cuda()
+        sample["net_input"]["src_tokens"] = sample["net_input"]["src_tokens"].to(self._device)
         return {"sample": sample}
 
     def inference(self, data):

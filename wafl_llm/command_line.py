@@ -68,6 +68,8 @@ def start_llm_server():
         if not name:
             print(f"Not running the service named {service}.")
             continue
+        if service not in configuration_names_dict:
+            continue
         to_run += configuration_names_dict[service] + " "
     os.system(to_run)
 

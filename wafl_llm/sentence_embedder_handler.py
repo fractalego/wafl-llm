@@ -20,8 +20,9 @@ class SentenceEmbedderHandler(BaseHandler):
     def initialize(self, ctx):
         self.manifest = ctx.manifest
         model_name = self._config["sentence_embedder_models"]
+        self._device = self._config["device"]
         _logger.info(f"Loading the model {model_name}.")
-        self._model = SentenceTransformer(model_name, device="cuda")
+        self._model = SentenceTransformer(model_name, device=self._device)
         _logger.info("sentence transformers model loaded successfully.")
         self.initialized = True
 

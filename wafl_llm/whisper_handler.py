@@ -21,6 +21,7 @@ class WhisperHandler(BaseHandler):
     def initialize(self, ctx):
         self.manifest = ctx.manifest
         model_name = self._config["whisper_model"]
+        self._device = self._config["device"]
         _logger.info(f"Loading the model {model_name}.")
 
         self.model = WhisperForConditionalGeneration.from_pretrained(model_name)
@@ -33,10 +34,12 @@ class WhisperHandler(BaseHandler):
         )
         self.model = (
             BetterTransformer.transform(self.model, keep_original_model=True)
-            .cuda()
+            .to(self._device)
             .half()
         )
-        self.model = torch.compile(self.model)
+        if self._device == "cuda":
+            self.model = torch.compile(self.model)
+
         _logger.info("Whisper model loaded successfully.")
         self.initialized = True
 
