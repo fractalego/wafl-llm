@@ -39,7 +39,9 @@ class SpeakerHandler(BaseHandler):
     def preprocess(self, data):
         text = data[0].get("body").get("text")
         sample = TTSHubInterface.get_model_input(self._task, text)
-        sample["net_input"]["src_tokens"] = sample["net_input"]["src_tokens"].to(self._device)
+        sample["net_input"]["src_tokens"] = sample["net_input"]["src_tokens"].to(
+            self._device
+        )
         return {"sample": sample}
 
     def inference(self, data):

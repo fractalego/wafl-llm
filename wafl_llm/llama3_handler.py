@@ -23,8 +23,7 @@ class Llama3LLMHandler(BaseHandler):
             "\nbot",
             "\nUser",
             "\nBot",
-            "\n\nComputer:"
-            "<|EOS|>",
+            "\n\nComputer:" "<|EOS|>",
             "</remember>",
             "</execute>\n",
             "</s>",

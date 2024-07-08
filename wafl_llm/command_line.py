@@ -59,11 +59,7 @@ def start_llm_server():
 
     os.system(f"cp {_path}/config.properties ./config.properties")
 
-    to_run = (
-        "torchserve --start --model-store models "
-        "--foreground "
-        "--models "
-    )
+    to_run = "torchserve --start --model-store models " "--foreground " "--models "
     for service, name in json.load(open(config_path)).items():
         if not name:
             print(f"Not running the service named {service}.")

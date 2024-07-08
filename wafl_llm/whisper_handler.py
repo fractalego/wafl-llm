@@ -39,7 +39,7 @@ class WhisperHandler(BaseHandler):
         )
         if self._device == "cuda":
             self.model = torch.compile(self.model)
-            
+
         _logger.info("Whisper model loaded successfully.")
         self.initialized = True
 

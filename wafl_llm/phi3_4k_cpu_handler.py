@@ -12,6 +12,7 @@ _path = os.path.dirname(__file__)
 _logger = logging.getLogger(__file__)
 _device = "cpu"
 
+
 class Phi3Mini4KCPUHandler(BaseHandler):
     def __init__(self, config):
         super().__init__()
@@ -83,7 +84,7 @@ class Phi3Mini4KCPUHandler(BaseHandler):
                     stopping_criteria=[stop_at_eos],
                 )
                 return "<||>".join(
-                    self._tokenizer.batch_decode(output_ids[:, input_ids.shape[1]:])
+                    self._tokenizer.batch_decode(output_ids[:, input_ids.shape[1] :])
                 )
 
     def postprocess(self, inference_output):
@@ -108,7 +109,9 @@ class Phi3Mini4KCPUHandler(BaseHandler):
             if speaker.lower() in ["assistant", "bot"]:
                 chat_template_list.append({"role": "assistant", "content": text})
         input_ids = self._tokenizer.encode(
-            "<|system|>\n" + chat_template_dictionary["system_prompt"] + "\n<|end|><|assistant|>\n"
+            "<|system|>\n"
+            + chat_template_dictionary["system_prompt"]
+            + "\n<|end|><|assistant|>\n"
         )
         input_ids = (
             input_ids + self._tokenizer.apply_chat_template(chat_template_list)[1:]

@@ -1,6 +1,8 @@
 import json
 import logging
 import os
+from typing import Dict
+
 import torch
 from transformers import AutoTokenizer
 
@@ -42,7 +44,8 @@ class Phi3Mini4KHandler(BaseHandler):
         model_name = self._config["llm_model"]
         self._tokenizer = AutoTokenizer.from_pretrained(model_name)
         _logger.info(f"Loading the model {model_name}.")
-        self._llm = LLM(model=model_name, dtype="bfloat16")
+        args = self._get_arguments()
+        self._llm = LLM(model=model_name, **args)
         _logger.info(f"Transformer model {model_name} loaded successfully.")
         self.initialized = True
 
@@ -100,7 +103,9 @@ class Phi3Mini4KHandler(BaseHandler):
             if speaker.lower() in ["assistant", "bot"]:
                 chat_template_list.append({"role": "assistant", "content": text})
         input_ids = self._tokenizer.encode(
-            "<|system|>\n" + chat_template_dictionary["system_prompt"] + "\n<|end|><|assistant|>\n"
+            "<|system|>\n"
+            + chat_template_dictionary["system_prompt"]
+            + "\n<|end|><|assistant|>\n"
         )
         input_ids = (
             input_ids + self._tokenizer.apply_chat_template(chat_template_list)[1:]
@@ -112,3 +117,16 @@ class Phi3Mini4KHandler(BaseHandler):
         system_prompt = chat_template_dictionary["system_prompt"]
         input_ids = self._tokenizer.encode(system_prompt)
         return input_ids
+
+    def _get_arguments(self) -> Dict[str, str]:
+        if "quantization" in self._config and self._config["quantization"]:
+            _logger.info("Quantization is enabled.")
+            return {
+                "quantization": "fp8",
+                "swap_space": 1,
+            }
+
+        return {
+            "dtype": "bfloat16",
+            "swap_space": 1,
+        }
