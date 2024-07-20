@@ -22,6 +22,9 @@ setup(
             "config.properties",
         ],
     },
+    setup_requires=[
+        "torch==2.3.0",
+    ],
     install_requires=[
         "vllm==0.4.2",
         "torch==2.3.0",
