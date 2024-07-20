@@ -22,9 +22,11 @@ setup(
             "config.properties",
         ],
     },
+    setup_requires=[
+        "torch==2.3.0",
+    ],
     install_requires=[
         "vllm==0.4.2",
-        "torch==2.3.0",
         "flash-attn==2.5.8",
         "transformers==4.41.0",
         "sentencepiece==0.1.98",
