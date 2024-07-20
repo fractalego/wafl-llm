@@ -12,7 +12,7 @@ _path = os.path.dirname(__file__)
 _logger = logging.getLogger(__file__)
 
 
-class DefaultLLMHandler(BaseHandler):
+class Llama3LLMHandler(BaseHandler):
     def __init__(self, config):
         super().__init__()
         self.initialized = False
@@ -23,11 +23,13 @@ class DefaultLLMHandler(BaseHandler):
             "\nbot",
             "\nUser",
             "\nBot",
-            "<|EOS|>",
+            "\n\nComputer:" "<|EOS|>",
             "</remember>",
             "</execute>\n",
             "</s>",
-            "<|end|>",
+            "<|im_end|>",
+            "<|eot_id|>",
+            "[delete_rule]",
         ]
 
     def initialize(self, ctx):
@@ -69,7 +71,15 @@ class DefaultLLMHandler(BaseHandler):
             )
             outputs = self._llm.generate(prompts, sampling_params)
             print(outputs)
-            return "<||>".join(output.outputs[0].text for output in outputs)
+
+            generated_texts = "<||>".join(output.outputs[0].text for output in outputs)
+            generated_texts = (
+                generated_texts.replace("<|im_start|>assistant\n", "")
+                .replace("<|im_start|>user\n", "")
+                .replace("<|im_start|>system\n", "")
+                .replace("<|im_start|>bot\n", "")
+            )
+            return generated_texts
 
     def postprocess(self, inference_output):
         return [
@@ -78,13 +88,16 @@ class DefaultLLMHandler(BaseHandler):
                     "prediction": inference_output,
                     "status": "success",
                     "version": get_variables()["version"],
+                    "model": self._config["llm_model"],
                 }
             )
         ]
 
     def _get_text_prompt(self, chat_template_dictionary):
         chat_template_list = []
-        chat_template_list.append({"role": "system", "content": chat_template_dictionary["system_prompt"]})
+        chat_template_list.append(
+            {"role": "system", "content": chat_template_dictionary["system_prompt"]}
+        )
         for item in chat_template_dictionary["conversation"]:
             speaker = item["speaker"]
             text = item["text"]
@@ -94,6 +107,6 @@ class DefaultLLMHandler(BaseHandler):
                 chat_template_list.append({"role": "assistant", "content": text})
 
         prompt = self._tokenizer.decode(
-            self._tokenizer.apply_chat_template(chat_template_list)[1:]
+            self._tokenizer.apply_chat_template(chat_template_list)
         )
         return prompt

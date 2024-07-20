@@ -34,11 +34,17 @@ The file should look like this (the default configuration)
   "llm_model": "mistralai/Mistral-7B-Instruct-v0.1",
   "speaker_model": "facebook/fastspeech2-en-ljspeech",
   "whisper_model": "fractalego/personal-whisper-distilled-model",
-  "sentence_embedder_models": "TaylorAI/gte-tiny"
+  "sentence_embedder_models": "TaylorAI/gte-tiny",
+  "device": "cuda",
+  "quantization": false,
 }
 ```
 
 The models are downloaded from the HugggingFace repository. Any other compatible model should work.
+The `device` can be set to `cuda` or `cpu`. 
+The `quantization` can be set to `true` or `false` and uses the vLLM `fp8` option. This will only work if your GPU supports it.
+Each model can be set to `null` to deactivate it (and save memory). 
+This is useful if you only want to use the LLM model, for example.
 
 
 #### Docker

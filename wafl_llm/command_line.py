@@ -1,11 +1,14 @@
+import json
 import os
 import sys
 import shutil
 
+from wafl_llm.configuration import configuration_names_dict
 from wafl_llm.variables import get_variables
 
 _path = os.path.dirname(__file__)
 _running_path = os.getcwd()
+
 
 def print_incipit():
     print()
@@ -38,7 +41,7 @@ def start_llm_server():
         shutil.rmtree(log_dir)
 
     config_path = f"{_path}/config.json"
-    if os.path.exists("config.json"):   #### load right config.json
+    if os.path.exists("config.json"):
         print("Found existing config.json in local directory.")
         config_path = f"{_running_path}/config.json"
 
@@ -56,15 +59,15 @@ def start_llm_server():
 
     os.system(f"cp {_path}/config.properties ./config.properties")
 
-    os.system(
-        "torchserve --start --model-store models "
-        "--models "
-        "bot=llm.mar "
-        "speaker=speaker.mar "
-        "whisper=whisper.mar "
-        "sentence_embedder=sentence_embedder.mar "
-        "--foreground "
-    )
+    to_run = "torchserve --start --model-store models " "--foreground " "--models "
+    for service, name in json.load(open(config_path)).items():
+        if not name:
+            print(f"Not running the service named {service}.")
+            continue
+        if service not in configuration_names_dict:
+            continue
+        to_run += configuration_names_dict[service] + " "
+    os.system(to_run)
 
 
 def process_cli():

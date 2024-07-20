@@ -1,20 +1,19 @@
 import json
 import logging
 import os
-from typing import Dict
-
 import torch
-from transformers import AutoTokenizer
 
-from vllm import LLM, SamplingParams
+from typing import List
+from transformers import AutoTokenizer, StoppingCriteria, AutoModelForCausalLM
 from ts.torch_handler.base_handler import BaseHandler
 from wafl_llm.variables import get_variables
 
 _path = os.path.dirname(__file__)
 _logger = logging.getLogger(__file__)
+_device = "cpu"
 
 
-class Phi3Mini4KHandler(BaseHandler):
+class Phi3Mini4KCPUHandler(BaseHandler):
     def __init__(self, config):
         super().__init__()
         self.initialized = False
@@ -37,7 +36,6 @@ class Phi3Mini4KHandler(BaseHandler):
             "\n\n- ai:",
             "\n\n- user:",
             "[delete_rule]",
-            "====="
         ]
 
     def initialize(self, ctx):
@@ -45,18 +43,20 @@ class Phi3Mini4KHandler(BaseHandler):
         model_name = self._config["llm_model"]
         self._tokenizer = AutoTokenizer.from_pretrained(model_name)
         _logger.info(f"Loading the model {model_name}.")
-        args = self._get_arguments()
-        self._llm = LLM(model=model_name, **args)
+        self._model = AutoModelForCausalLM.from_pretrained(
+            model_name,
+        )
         _logger.info(f"Transformer model {model_name} loaded successfully.")
         self.initialized = True
 
     def preprocess(self, data):
-        prompt = self._get_text_prompt(data[0].get("body").get("data"))
+        text = data[0].get("body").get("data")
         temperature = data[0].get("body").get("temperature")
         num_tokens = data[0].get("body").get("num_tokens")
         num_replicas = data[0].get("body").get("num_replicas")
+        input_ids = self._get_input_ids(text).to(_device)
         return {
-            "prompt": prompt,
+            "input_ids": input_ids,
             "temperature": temperature,
             "num_tokens": num_tokens,
             "last_strings": self._last_strings,
@@ -65,22 +65,27 @@ class Phi3Mini4KHandler(BaseHandler):
 
     def inference(self, data):
         with torch.no_grad():
-            prompt = data["prompt"]
-            print(prompt)
+            input_ids = data["input_ids"]
             temperature = data["temperature"]
             num_tokens = data["num_tokens"]
             last_strings = data["last_strings"]
             num_replicas = data["num_replicas"]
-            prompts = [prompt] * num_replicas
-            sampling_params = SamplingParams(
-                temperature=temperature,
-                top_p=0.95,
-                stop=last_strings,
-                max_tokens=num_tokens,
-            )
-            outputs = self._llm.generate(prompts, sampling_params)
-            print(outputs[0].outputs[0].text)
-            return "<||>".join(output.outputs[0].text for output in outputs)
+            stop_at_eos = StopAtEOS(self._tokenizer, last_strings)
+            with torch.no_grad():
+                input_ids = torch.cat([input_ids] * num_replicas, dim=0)
+                output_ids = self._model.generate(
+                    input_ids.to(_device),
+                    max_new_tokens=num_tokens,
+                    temperature=temperature,
+                    do_sample=True,
+                    pad_token_id=self._tokenizer.eos_token_id,
+                    eos_token_id=self._tokenizer.eos_token_id,
+                    use_cache=True,
+                    stopping_criteria=[stop_at_eos],
+                )
+                return "<||>".join(
+                    self._tokenizer.batch_decode(output_ids[:, input_ids.shape[1] :])
+                )
 
     def postprocess(self, inference_output):
         return [
@@ -94,7 +99,7 @@ class Phi3Mini4KHandler(BaseHandler):
             )
         ]
 
-    def _get_text_prompt(self, chat_template_dictionary):
+    def _get_input_ids(self, chat_template_dictionary):
         chat_template_list = []
         for item in chat_template_dictionary["conversation"]:
             speaker = item["speaker"]
@@ -111,23 +116,31 @@ class Phi3Mini4KHandler(BaseHandler):
         input_ids = (
             input_ids + self._tokenizer.apply_chat_template(chat_template_list)[1:]
         )
-        prompt = self._tokenizer.decode(input_ids[1:])
-        return prompt
+        return torch.tensor([input_ids])
 
     def _get_system_prompt_input_ids(self, chat_template_dictionary):
         system_prompt = chat_template_dictionary["system_prompt"]
         input_ids = self._tokenizer.encode(system_prompt)
         return input_ids
 
-    def _get_arguments(self) -> Dict[str, str]:
-        if "quantization" in self._config and self._config["quantization"]:
-            _logger.info("Quantization is enabled.")
-            return {
-                "quantization": "fp8",
-                "swap_space": 1,
-            }
 
-        return {
-            "dtype": "bfloat16",
-            "swap_space": 1,
-        }
+class StopAtEOS(StoppingCriteria):
+    def __init__(self, tokenizer: "AutoTokenizer", last_strings: List[str]):
+        self._tokenizer = tokenizer
+        self._last_strings = last_strings
+
+    def __call__(
+        self, input_ids: torch.LongTensor, scores: torch.FloatTensor, **kwargs
+    ) -> bool:
+        num_ending_tokens = 0
+        for token_ids in input_ids:
+            generated_text = self._tokenizer.decode(token_ids)
+            for last_string in self._last_strings:
+                if generated_text.endswith(last_string):
+                    num_ending_tokens += 1
+                    break
+
+            if num_ending_tokens >= 1:
+                return True
+
+        return False
