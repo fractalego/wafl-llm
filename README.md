@@ -5,7 +5,6 @@ Both can be installed on the same machine.
 This is the LLM side of the [WAFL project](https://github.com/fractalego/wafl).
 
 ![The two parts of WAFL](images/two-parts.png)
-{: width="200px"}
 
 
 ## LLM side (needs a GPU to be efficient)
