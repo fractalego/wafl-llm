@@ -7,7 +7,7 @@ This is the LLM side of the [WAFL project](https://github.com/fractalego/wafl).
 ![The two parts of WAFL](images/two-parts.png)
 
 
-## LLM side (needs a GPU)
+## LLM side (needs a GPU to be efficient)
 
 This is a model server for the speech-to-text model, the LLM, the embedding system, and the text-to-speech model.
 
