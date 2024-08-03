@@ -28,7 +28,7 @@ def add_cwd_to_syspath():
 
 
 def start_llm_server():
-    services = ["llm", "sentence_embedder", "whisper", "speaker"]
+    services = ["llm", "sentence_embedder", "whisper", "speaker", "entailer"]
     if os.path.exists("models"):
         print("Removing the prior models/ directory.")
         shutil.rmtree("models/")
@@ -65,8 +65,10 @@ def start_llm_server():
             print(f"Not running the service named {service}.")
             continue
         if service not in configuration_names_dict:
+            print(f"Skipping the unknown service named {service}.")
             continue
         to_run += configuration_names_dict[service] + " "
+    print("Executing >", to_run)
     os.system(to_run)
 
 

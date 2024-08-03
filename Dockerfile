@@ -33,7 +33,10 @@ RUN torch-model-archiver --model-name "whisper" --version 0.0.1 \
                          --handler /app/wafl_llm/whisper_handler.py --extra-files /app/wafl_llm/config.json --export-path /app/models/
 
 RUN torch-model-archiver --model-name "sentence_embedder" --version 0.0.1 \
-                         --handler /app/wafl_llm/sentence_embedder_handler.py --extra-files /app/wafl_llm/config.json --export-path /app/models/
+                         --handler /app/wafl_llm/sentence_embedder_handler.py --extra-files /app/wafl_llm/config.json --export-path /app/models/ \
+
+RUN torch-model-archiver --model-name "entailer" --version 0.0.1 \
+                     --handler /app/wafl_llm/entailer_handler.py --extra-files /app/wafl_llm/config.json --export-path /app/models/
 
 COPY config.properties /app/
 CMD ["torchserve", "--start", "--model-store", "models", \

@@ -37,7 +37,7 @@ class Phi3Mini4KHandler(BaseHandler):
             "\n\n- ai:",
             "\n\n- user:",
             "[delete_rule]",
-            "====="
+            "=====",
         ]
 
     def initialize(self, ctx):
