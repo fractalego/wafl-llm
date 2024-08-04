@@ -44,6 +44,7 @@ setup(
         "g2p_en==2.1.0",
         "sentence_transformers==2.7.0",
         "einops==0.6.1",
+        "peft==0.2.0"
     ],
     classifiers=[
         "License :: OSI Approved :: MIT License",
