@@ -40,8 +40,6 @@ setup(
         "torch-model-archiver==0.7.1",
         "torch-workflow-archiver==0.2.6",
         "nvgpu==0.9.0",
-        "fairseq==0.12.2",
-        "g2p_en==2.1.0",
         "sentence_transformers==2.7.0",
         "einops==0.6.1",
         "peft==0.2.0"
