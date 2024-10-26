@@ -24,7 +24,7 @@ class SpeakerHandler(BaseHandler):
         model_name = self._config["speaker_model"]
         self._device = self._config["device"]
         _logger.info(f"Loading the model {model_name}.")
-        self._sinthetizer = pipeline("text-to-speech", "microsoft/speecht5_tts", device=self._device)
+        self._sinthetizer = pipeline("text-to-speech", "microsoft/speecht5_tts", device=self._device, torch_dtype=torch.bfloat16)
         _logger.info("Speaker model loaded successfully.")
         self.initialized = True
 
