@@ -19,6 +19,7 @@ class LLMHandlerFactory:
         "cuda": {
             "wafl-mistral_v0.1": MistralHandler,
             "wafl-phi3-mini-4k": Phi3Mini4KHandler,
+            "wafl-phi3.5-mini-instruct": Phi3Mini4KHandler,
             "wafl-llama-3-8B-instruct": Llama3LLMHandler,
         },
         "cpu": {
