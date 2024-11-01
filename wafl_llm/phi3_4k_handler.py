@@ -126,12 +126,10 @@ class Phi3Mini4KHandler(BaseHandler):
                 "quantization": "fp8",
                 "swap_space": 1,
                 "trust_remote_code": True,
-                "max_model_len": 66000,
             }
 
         return {
             "dtype": "bfloat16",
             "swap_space": 1,
             "trust_remote_code": True,
-            "max_model_len": 66000,
         }
