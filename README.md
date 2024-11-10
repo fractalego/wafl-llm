@@ -32,12 +32,14 @@ The file should look like this (the default configuration)
 ```json
 {
   "llm_model": "fractalego/wafl-phi3-mini-4k",
-  "speaker_model": "facebook/fastspeech2-en-ljspeech",
+  "speaker_model": "microsoft/speecht5_tts",
   "whisper_model": "fractalego/personal-whisper-distilled-model",
   "sentence_embedder_models": "TaylorAI/gte-tiny",
+  "entailer_model": "vectara/hallucination_evaluation_model",
   "device": "cuda",
   "quantization": false
 }
+
 ```
 
 The models are downloaded from the HugggingFace repository. Any other compatible model should work.
