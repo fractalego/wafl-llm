@@ -27,7 +27,7 @@ setup(
     ],
     install_requires=[
         "vllm==0.5.4",
-        "flash-attn==2.5.8",
+        "flash-attn==2.7.0.post2",
         "transformers==4.46.0",
         "sentencepiece==0.1.98",
         "accelerate==0.28.0",
