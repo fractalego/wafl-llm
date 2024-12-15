@@ -1,0 +1,19 @@
+[project]
+name = "wafl_llm"
+version = "0.1.1"
+authors = [
+  { name="Alberto Cetoli", email="alberto@fractalego.io" },
+]
+description = "A hybrid chatbot - LLM side."
+readme = "README.md"
+license = {text = "MIT License"}
+requires-python = ">=3.11"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/fractalego/wafl_llm"
+Issues = "https://github.com/fractalego/wafl_llm/issues"
