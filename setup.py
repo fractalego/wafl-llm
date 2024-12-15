@@ -23,13 +23,13 @@ setup(
         ],
     },
     setup_requires=[
-        "torch==2.3.0",
+        "torch==2.5.1",
     ],
     install_requires=[
-        "vllm==0.4.2",
-        "flash-attn==2.5.8",
-        "transformers==4.41.0",
-        "sentencepiece==0.1.98",
+        "vllm==0.6.4.post1 ",
+        "flash-attn==2.7.0.post2",
+        "transformers==4.47.0",
+        "sentencepiece==0.2.0",
         "accelerate==0.28.0",
         "bitsandbytes==0.41.3",
         "optimum==1.8.6",
@@ -40,10 +40,9 @@ setup(
         "torch-model-archiver==0.7.1",
         "torch-workflow-archiver==0.2.6",
         "nvgpu==0.9.0",
-        "fairseq==0.12.2",
-        "g2p_en==2.1.0",
         "sentence_transformers==2.7.0",
         "einops==0.6.1",
+        "peft==0.2.0"
     ],
     classifiers=[
         "License :: OSI Approved :: MIT License",

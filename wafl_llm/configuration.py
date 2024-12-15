@@ -3,4 +3,6 @@ configuration_names_dict = {
     "speaker_model": "speaker=speaker.mar",
     "whisper_model": "whisper=whisper.mar",
     "sentence_embedder_models": "sentence_embedder=sentence_embedder.mar",
+    "entailer_model": "entailer=entailer.mar",
+    "configuration_model": "configuration=configuration.mar",
 }

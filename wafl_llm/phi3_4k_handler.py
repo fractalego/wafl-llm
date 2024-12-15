@@ -36,8 +36,9 @@ class Phi3Mini4KHandler(BaseHandler):
             "\n\n- output:",
             "\n\n- ai:",
             "\n\n- user:",
+            "\n\n- response:",
             "[delete_rule]",
-            "====="
+            "=====",
         ]
 
     def initialize(self, ctx):
@@ -106,8 +107,10 @@ class Phi3Mini4KHandler(BaseHandler):
         input_ids = self._tokenizer.encode(
             "<|system|>\n"
             + chat_template_dictionary["system_prompt"]
-            + "\n<|end|><|assistant|>\n"
+            + "\n<|end|>"
         )
+        if chat_template_list[0]["role"] == "assistant":
+            input_ids = input_ids + self._tokenizer.encode("<|assistant|>")[1:]
         input_ids = (
             input_ids + self._tokenizer.apply_chat_template(chat_template_list)[1:]
         )

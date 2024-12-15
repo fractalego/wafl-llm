@@ -28,7 +28,7 @@ def add_cwd_to_syspath():
 
 
 def start_llm_server():
-    services = ["llm", "sentence_embedder", "whisper", "speaker"]
+    services = ["llm", "sentence_embedder", "whisper", "speaker", "entailer", "configuration"]
     if os.path.exists("models"):
         print("Removing the prior models/ directory.")
         shutil.rmtree("models/")
@@ -60,13 +60,16 @@ def start_llm_server():
     os.system(f"cp {_path}/config.properties ./config.properties")
 
     to_run = "torchserve --start --model-store models " "--foreground " "--models "
+    to_run += configuration_names_dict["configuration_model"] + " "
     for service, name in json.load(open(config_path)).items():
         if not name:
             print(f"Not running the service named {service}.")
             continue
         if service not in configuration_names_dict:
+            print(f"Skipping the unknown service named {service}.")
             continue
         to_run += configuration_names_dict[service] + " "
+    print("Executing >", to_run)
     os.system(to_run)
 
 

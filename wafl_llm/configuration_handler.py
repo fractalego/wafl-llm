@@ -1,51 +1,54 @@
-import base64
 import json
 import logging
 import os
-import torch
-from transformers import pipeline
 
 from ts.torch_handler.base_handler import BaseHandler
-from wafl_llm.speaker_embeddings import speaker_embedding
 
 _path = os.path.dirname(__file__)
 _logger = logging.getLogger(__file__)
 
 
-class SpeakerHandler(BaseHandler):
+class ConfigurationHandler(BaseHandler):
     def __init__(self):
         super().__init__()
         self.initialized = False
-        _logger.info("The handler is created!")
+        _logger.info("The Configuration handler is created!")
         self._config = json.load(open(os.path.join(_path, "config.json"), "r"))
 
     def initialize(self, ctx):
         self.manifest = ctx.manifest
-        model_name = self._config["speaker_model"]
+        self._llm_model_name = self._config["llm_model"]
+        self._entailer_model_name = self._config["entailer_model"]
+        self._sentence_embedder_model_name = self._config["sentence_embedder_models"]
+        self._speaker_model_name = self._config["speaker_model"]
+        self._whisper_model_name = self._config["whisper_model"]
+        self._quantization = self._config["quantization"]
         self._device = self._config["device"]
-        _logger.info(f"Loading the model {model_name}.")
-        self._sinthetizer = pipeline("text-to-speech", "microsoft/speecht5_tts", device=self._device, torch_dtype=torch.bfloat16)
+
+
         _logger.info("Speaker model loaded successfully.")
         self.initialized = True
 
     def preprocess(self, data):
-        text = data[0].get("body").get("text")
-        return {"text": text}
+        version = data[0].get("body").get("version")
+        return {"version": version}
 
     def inference(self, data):
-        with torch.no_grad():
-            sample = data["text"]
-            speech = self._sinthetizer(sample, forward_params={"speaker_embeddings": speaker_embedding})
-            return {
-                "wav": base64.b64encode(speech["audio"].tobytes()).decode("utf-8"),
-                "rate": speech["sampling_rate"],
-            }
+        return {
+            "llm_model": self._llm_model_name,
+            "entailer_model": self._entailer_model_name,
+            "sentence_embedder_models": self._sentence_embedder_model_name,
+            "speaker_model": self._speaker_model_name,
+            "whisper_model": self._whisper_model_name,
+            "quantization": self._quantization,
+            "device": self._device,
+        }
 
     def postprocess(self, inference_output):
         return [json.dumps(inference_output)]
 
 
-_service = SpeakerHandler()
+_service = ConfigurationHandler()
 
 
 def handle(data, context):
