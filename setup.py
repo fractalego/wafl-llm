@@ -23,13 +23,13 @@ setup(
         ],
     },
     setup_requires=[
-        "torch==2.4.0",
+        "torch==2.5.1",
     ],
     install_requires=[
-        "vllm==0.5.4",
+        "vllm==0.6.4.post1 ",
         "flash-attn==2.7.0.post2",
-        "transformers==4.46.0",
-        "sentencepiece==0.1.98",
+        "transformers==4.47.0",
+        "sentencepiece==0.2.0",
         "accelerate==0.28.0",
         "bitsandbytes==0.41.3",
         "optimum==1.8.6",

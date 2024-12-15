@@ -36,6 +36,7 @@ class Phi3Mini4KHandler(BaseHandler):
             "\n\n- output:",
             "\n\n- ai:",
             "\n\n- user:",
+            "\n\n- response:",
             "[delete_rule]",
             "=====",
         ]

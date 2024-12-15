@@ -1,8 +1,8 @@
-torch==2.4.0
-vllm==0.5.4
+torch==2.5.1
+vllm==0.6.4.post1
 flash-attn==2.7.0.post2
-transformers==4.46.0
-sentencepiece==0.1.98
+transformers==4.47.0
+sentencepiece==0.2.0
 accelerate==0.28.0
 bitsandbytes==0.41.3
 optimum==1.8.6
@@ -15,4 +15,4 @@ torch-workflow-archiver==0.2.6
 nvgpu==0.9.0
 sentence_transformers==2.7.0
 einops==0.6.1
-peft==0.2.
+peft==0.2.0
