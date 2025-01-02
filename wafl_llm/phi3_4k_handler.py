@@ -47,7 +47,7 @@ class Phi3Mini4KHandler(BaseHandler):
         self._tokenizer = AutoTokenizer.from_pretrained(model_name)
         _logger.info(f"Loading the model {model_name}.")
         args = self._get_arguments()
-        self._llm = LLM(model=model_name, **args)
+        self._llm = LLM(model=model_name, max_model_len=4096, **args)
         _logger.info(f"Transformer model {model_name} loaded successfully.")
         self.initialized = True
 
