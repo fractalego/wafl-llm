@@ -67,7 +67,6 @@ class Phi3Mini4KHandler(BaseHandler):
     def inference(self, data):
         with torch.no_grad():
             prompt = data["prompt"]
-            print(prompt)
             temperature = data["temperature"]
             num_tokens = data["num_tokens"]
             last_strings = data["last_strings"]
@@ -115,6 +114,7 @@ class Phi3Mini4KHandler(BaseHandler):
             input_ids + self._tokenizer.apply_chat_template(chat_template_list)[1:]
         )
         prompt = self._tokenizer.decode(input_ids[1:])
+        print(prompt)
         return prompt
 
     def _get_system_prompt_input_ids(self, chat_template_dictionary):
