@@ -8,6 +8,8 @@ from wafl_llm.default_handler import DefaultLLMHandler
 from wafl_llm.llama3_handler import Llama3LLMHandler
 from wafl_llm.mistral_handler import MistralHandler
 from wafl_llm.phi3_4k_handler import Phi3Mini4KHandler
+from wafl_llm.phi35_4k_handler import Phi35Mini4KHandler
+from wafl_llm.phi35_4k_cpu_handler import Phi35Mini4KCPUHandler
 from transformers import AutoConfig
 
 _path = os.path.dirname(__file__)
@@ -19,11 +21,12 @@ class LLMHandlerFactory:
         "cuda": {
             "wafl-mistral_v0.1": MistralHandler,
             "wafl-phi3-mini-4k": Phi3Mini4KHandler,
-            "wafl-phi3.5-mini-instruct": Phi3Mini4KHandler,
+            "wafl-phi3.5-mini-instruct": Phi35Mini4KHandler,
             "wafl-llama-3-8B-instruct": Llama3LLMHandler,
         },
         "cpu": {
             "wafl-phi3-mini-4k": Phi3Mini4KCPUHandler,
+            "wafl-phi3.5-mini-instruct": Phi35Mini4KCPUHandler,
         },
     }
 

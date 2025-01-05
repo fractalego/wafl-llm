@@ -14,7 +14,7 @@ _path = os.path.dirname(__file__)
 _logger = logging.getLogger(__file__)
 
 
-class Phi3Mini4KHandler(BaseHandler):
+class Phi35Mini4KHandler(BaseHandler):
     def __init__(self, config):
         super().__init__()
         self.initialized = False
@@ -108,14 +108,14 @@ class Phi3Mini4KHandler(BaseHandler):
             + chat_template_dictionary["system_prompt"]
             + "\n<|end|>"
         )
-        if chat_template_list[0]["role"] == "assistant":
-            input_ids = input_ids + self._tokenizer.encode("<|assistant|>")[1:]
         input_ids = (
-            input_ids + self._tokenizer.apply_chat_template(chat_template_list)[1:]
-        )
-        prompt = self._tokenizer.decode(input_ids[1:])
+            input_ids + self._tokenizer.apply_chat_template(chat_template_list)
+        )[:-1]
+        input_ids = input_ids + self._tokenizer.encode("<|assistant|>")
+        prompt = self._tokenizer.decode(input_ids)
         print(prompt)
         return prompt
+
 
     def _get_system_prompt_input_ids(self, chat_template_dictionary):
         system_prompt = chat_template_dictionary["system_prompt"]

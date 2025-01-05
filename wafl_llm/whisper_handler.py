@@ -3,6 +3,10 @@ import logging
 import os
 import torch
 
+import torch._dynamo
+torch._dynamo.config.suppress_errors = True
+
+
 from transformers import WhisperProcessor, WhisperForConditionalGeneration
 from optimum.bettertransformer import BetterTransformer
 from ts.torch_handler.base_handler import BaseHandler
