@@ -33,6 +33,8 @@ class Phi3Mini4KHandler(BaseHandler):
             "<|assistant|>",
             "<|user|>",
             "\n\n---",
+            "\n\nassistant:",
+            "\n\n- assistant:",
             "\n\n- output:",
             "\n\n- ai:",
             "\n\n- user:",

@@ -32,11 +32,14 @@ class Phi35Mini4KCPUHandler(BaseHandler):
             "<|assistant|>",
             "<|user|>",
             "\n\n---",
+            "\n\nassistant:",
+            "\n\n- assistant:",
             "\n\n- output:",
             "\n\n- ai:",
             "\n\n- user:",
             "\n\n- response:",
             "[delete_rule]",
+            "=====",
         ]
 
     def initialize(self, ctx):
